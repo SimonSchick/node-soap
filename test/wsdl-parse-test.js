@@ -1,34 +1,34 @@
 'use strict';
 
 const path = require('path');
-const open_wsdl = require('../lib/wsdl').open_wsdl;
+const { open_wsdl } = require('../lib/wsdl');
 const assert = require('assert');
 
-describe(__filename, function () {
-  it('should parse recursive elements', function (done) {
-    open_wsdl(path.resolve(__dirname, 'wsdl/recursive.wsdl'), function (err, def) {
+describe(__filename, () => {
+  it('should parse recursive elements', done => {
+    open_wsdl(path.resolve(__dirname, 'wsdl/recursive.wsdl'), (err, def) => {
       assert.equal(def.definitions.messages.operationRequest.parts['constraint[]'].expression,
-          def.definitions.messages.operationRequest.parts['constraint[]'].expression.expression);
+        def.definitions.messages.operationRequest.parts['constraint[]'].expression.expression);
       assert.equal(def.definitions.messages.operationRequest.parts['constraint[]'].expression,
-          def.definitions.messages.operationRequest.parts['constraint[]'].expression.expression['constraint[]'].expression);
+        def.definitions.messages.operationRequest.parts['constraint[]'].expression.expression['constraint[]'].expression);
       done();
     });
   });
 
-  it('should parse recursive wsdls', function (done) {
-    open_wsdl(path.resolve(__dirname, 'wsdl/recursive/file.wsdl'), function (err, def) {
+  it('should parse recursive wsdls', done => {
+    open_wsdl(path.resolve(__dirname, 'wsdl/recursive/file.wsdl'), (err, def) => {
       // If we get here then we succeeded
-      done( err );
+      done(err);
     });
   });
 
-  it('should parse recursive wsdls keeping default options', function(done) {
-    open_wsdl(path.resolve(__dirname, 'wsdl/recursive/file.wsdl'), function (err, def) {
+  it('should parse recursive wsdls keeping default options', done => {
+    open_wsdl(path.resolve(__dirname, 'wsdl/recursive/file.wsdl'), (err, def) => {
       if (err) {
-        return done( err );
+        return done(err);
       }
 
-      def._includesWsdl.forEach(function(currentWsdl) {
+      def._includesWsdl.forEach(currentWsdl => {
         assert.deepEqual(def.options, currentWsdl.options);
       });
 
@@ -36,18 +36,18 @@ describe(__filename, function () {
     });
   });
 
-  it('should parse recursive wsdls keeping provided options', function(done) {
+  it('should parse recursive wsdls keeping provided options', done => {
     open_wsdl(path.resolve(__dirname, 'wsdl/recursive/file.wsdl'), {
       ignoredNamespaces: {
         namespaces: ['targetNamespace', 'typedNamespace'],
         override: true
       }
-    } , function (err, def) {
+    }, (err, def) => {
       if (err) {
-        return done( err );
+        return done(err);
       }
 
-      def._includesWsdl.forEach(function(currentWsdl, index) {
+      def._includesWsdl.forEach((currentWsdl, index) => {
         assert.deepEqual(def.options, currentWsdl.options);
       });
 

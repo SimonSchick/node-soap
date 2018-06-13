@@ -1,23 +1,23 @@
 'use strict';
 
-describe('NTLMSecurity', function() {
-  const NTLMSecurity = require('../../').NTLMSecurity;
-  const username = "admin";
-  const password = "password1234";
-  const domain = "LOCAL";
-  const workstation = "MACHINE";
+describe('NTLMSecurity', () => {
+  const { NTLMSecurity } = require('../../');
+  const username = 'admin';
+  const password = 'password1234';
+  const domain = 'LOCAL';
+  const workstation = 'MACHINE';
 
-  it('is a function', function() {
+  it('is a function', () => {
     NTLMSecurity.should.be.type('function');
   });
 
-  describe('constructor', function () {
-    it('should optionally accept an options object as the first parameter', function () {
+  describe('constructor', () => {
+    it('should optionally accept an options object as the first parameter', () => {
       const options = {
-        username: username,
-        password: password,
-        domain: domain,
-        workstation: workstation
+        username,
+        password,
+        domain,
+        workstation
       };
       const instance = new NTLMSecurity(options);
       instance.defaults.should.have.property('username', options.username);
@@ -27,7 +27,7 @@ describe('NTLMSecurity', function() {
       instance.defaults.should.have.property('ntlm', true);
     });
 
-    it('should accept valid variables', function() {
+    it('should accept valid variables', () => {
       const instance = new NTLMSecurity(username, password, domain, workstation);
       instance.defaults.should.have.property('username', username);
       instance.defaults.should.have.property('password', password);
@@ -36,9 +36,9 @@ describe('NTLMSecurity', function() {
       instance.defaults.should.have.property('ntlm', true);
     });
   });
-  
-  describe('addHeaders', function () {
-    it('should set connection as \'keep-alive\'', function () {
+
+  describe('addHeaders', () => {
+    it('should set connection as \'keep-alive\'', () => {
       const headers = {};
       const instance = new NTLMSecurity(username, password);
       instance.addHeaders(headers);
@@ -46,13 +46,13 @@ describe('NTLMSecurity', function() {
     });
   });
 
-  describe('defaultOption param', function() {
-    it('is used in addOptions', function() {
+  describe('defaultOption param', () => {
+    it('is used in addOptions', () => {
       const options = {};
       const instance = new NTLMSecurity(username, password);
       instance.addOptions(options);
-      options.should.have.property("username", username);
-      options.should.have.property("password", password);
+      options.should.have.property('username', username);
+      options.should.have.property('password', password);
     });
   });
 });

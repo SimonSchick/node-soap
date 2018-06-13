@@ -1,24 +1,24 @@
 'use strict';
 
-describe('BearerSecurity', function() {
-  const BearerSecurity = require('../../').BearerSecurity;
-  const token = "token";
+describe('BearerSecurity', () => {
+  const { BearerSecurity } = require('../../');
+  const token = 'token';
 
-  it('is a function', function() {
+  it('is a function', () => {
     BearerSecurity.should.be.type('function');
   });
 
-  describe('defaultOption param', function() {
-    it('is accepted as the second param', function() {
+  describe('defaultOption param', () => {
+    it('is accepted as the second param', () => {
       new BearerSecurity(token, {});
     });
 
-    it('is used in addOptions', function() {
+    it('is used in addOptions', () => {
       const options = {};
       const defaultOptions = { foo: 2 };
       const instance = new BearerSecurity(token, defaultOptions);
       instance.addOptions(options);
-      options.should.have.property("foo", 2);
+      options.should.have.property('foo', 2);
     });
   });
 });

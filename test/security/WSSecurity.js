@@ -3,14 +3,14 @@
 const fs = require('fs');
 const { join } = require('path');
 
-describe('WSSecurity', function() {
-  const WSSecurity = require('../../').WSSecurity;
+describe('WSSecurity', () => {
+  const { WSSecurity } = require('../../');
 
-  it('is a function', function() {
+  it('is a function', () => {
     WSSecurity.should.be.type('function');
   });
 
-  it('should accept valid constructor variables', function() {
+  it('should accept valid constructor variables', () => {
     const username = 'myUser';
     const password = 'myPass';
     const options = {
@@ -26,7 +26,7 @@ describe('WSSecurity', function() {
     instance.should.have.property('_actor', options.actor);
   });
 
-  it('should accept passwordType as 3rd arg', function() {
+  it('should accept passwordType as 3rd arg', () => {
     const username = 'myUser';
     const password = 'myPass';
     const passwordType = 'PasswordText';
@@ -38,7 +38,7 @@ describe('WSSecurity', function() {
     instance.should.not.have.property('_actor');
   });
 
-  it('should insert a WSSecurity when postProcess is called', function() {
+  it('should insert a WSSecurity when postProcess is called', () => {
     const username = 'myUser';
     const password = 'myPass';
     const options = {

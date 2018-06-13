@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 exports.customDeserializer = {
 
-  date: function (text, context) {
+  date(text, context) {
     return text;
   }
 };

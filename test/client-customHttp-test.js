@@ -13,9 +13,9 @@ const { EventEmitter } = require('events');
 const semver = require('semver');
 const should = require('should');
 
-it('should allow customization of httpClient and the wsdl file download should pass through it', function(done) {
-  
-  //Make a custom http agent to use streams instead on net socket
+it('should allow customization of httpClient and the wsdl file download should pass through it', done => {
+
+  // Make a custom http agent to use streams instead on net socket
   class CustomAgent extends EventEmitter {
     constructor(options, socket){
       super();
@@ -25,27 +25,27 @@ it('should allow customization of httpClient and the wsdl file download should p
       this.options = options || {};
       this.proxyOptions = {};
     }
-    
+
     addRequest(req, options) {
       req.onSocket(this.proxyStream);
     }
   }
 
-    //Custom httpClient  
+  // Custom httpClient
   class MyHttpClient extends httpClient {
-    constructor (options, socket){
+    constructor(options, socket){
       super(options);
       this.agent = new CustomAgent(options, socket);
     }
-      
-      
+
+
     request(rurl, data, callback, exheaders, exoptions) {
       const self = this;
       const options = self.buildRequest(rurl, data, exheaders, exoptions);
-      //Specify agent to use
+      // Specify agent to use
       options.agent = this.agent;
-      const headers = options.headers;
-      const req = self._request(options, function(err, res, body) {
+      const { headers } = options;
+      const req = self._request(options, (err, res, body) => {
         if (err) {
           return callback(err);
         }
@@ -59,8 +59,8 @@ it('should allow customization of httpClient and the wsdl file download should p
     };
   }
 
-  //Create a duplex stream 
-  
+  // Create a duplex stream
+
   const httpReqStream = new stream.PassThrough();
   const httpResStream = new stream.PassThrough();
   const socketStream = duplexer(httpReqStream, httpResStream);
@@ -74,30 +74,30 @@ it('should allow customization of httpClient and the wsdl file download should p
 
   socketStream.destroy = function() {
   };
-  
+
   const wsdl = fs.readFileSync('./test/wsdl/default_namespace.wsdl').toString('utf8');
-  //Should be able to read from stream the request 
-  httpReqStream.once('readable', function readRequest() {
+  // Should be able to read from stream the request
+  httpReqStream.once('readable', () => {
     const chunk = httpReqStream.read();
     should.exist(chunk);
-    
-    //This is for compatibility with old node releases <= 0.10
-    //Hackish
+
+    // This is for compatibility with old node releases <= 0.10
+    // Hackish
     if(semver.lt(process.version, '0.11.0'))
     {
-      socketStream.on('data', function(data) {
-        socketStream.ondata(data,0,1984);
+      socketStream.on('data', data => {
+        socketStream.ondata(data, 0, 1984);
       });
     }
-    //Now write the response with the wsdl
-    const state = httpResStream.write('HTTP/1.1 200 OK\r\nContent-Type: text/xml; charset=utf-8\r\nContent-Length: 1904\r\n\r\n'+wsdl);
+    // Now write the response with the wsdl
+    const state = httpResStream.write(`HTTP/1.1 200 OK\r\nContent-Type: text/xml; charset=utf-8\r\nContent-Length: 1904\r\n\r\n${wsdl}`);
   });
 
   const httpCustomClient = new MyHttpClient({}, socketStream);
   const url = 'http://localhost:50000/Platform.asmx?wsdl';
   soap.createClient(url,
-    {httpClient: httpCustomClient},
-    function(err, client) {
+    { httpClient: httpCustomClient },
+    (err, client) => {
       assert.ok(client);
       assert.ifError(err);
       assert.equal(client.httpClient, httpCustomClient);

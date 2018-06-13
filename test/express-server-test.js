@@ -26,13 +26,13 @@ const responseXML = '<?xml version="1.0" encoding="utf-8"?>' +
   '</soap:Body>' +
   '</soap:Envelope>';
 
-describe('Express server without middleware', function () {
+describe('Express server without middleware', () => {
 
-  before(function (done) {
+  before(done => {
     const service = {
       Hello_Service: {
         Hello_Port: {
-          sayHello: function (args) {
+          sayHello(args) {
             return {
               greeting: args.firstName
             };
@@ -42,30 +42,30 @@ describe('Express server without middleware', function () {
     };
 
     expressServer = express();
-    server = expressServer.listen(51515, function () {
+    server = expressServer.listen(51515, () => {
       const soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
-      url = 'http://' + server.address().address + ':' + server.address().port;
+      url = `http://${server.address().address}:${server.address().port}`;
       if (server.address().address === '0.0.0.0' || server.address().address === '::') {
-        url = 'http://127.0.0.1:' + server.address().port;
+        url = `http://127.0.0.1:${server.address().port}`;
       }
       done();
     });
   });
 
-  after(function () {
+  after(() => {
     server.close();
   });
 
-  it('should handle body without middleware', function (done) {
+  it('should handle body without middleware', done => {
     request({
-      url: url + '/SayHello',
+      url: `${url}/SayHello`,
       method: 'POST',
       headers: {
-        SOAPAction: "sayHello",
-        "Content-Type": 'text/xml; charset="utf-8"'
+        SOAPAction: 'sayHello',
+        'Content-Type': 'text/xml; charset="utf-8"'
       },
       body: requestXML
-    }, function (err, response, body) {
+    }, (err, response, body) => {
       if (err) {
         throw err;
       }
@@ -74,14 +74,14 @@ describe('Express server without middleware', function () {
     });
   });
 
-  it('should serve wsdl', function (done) {
+  it('should serve wsdl', done => {
     request({
-      url: url + '/SayHello?wsdl',
+      url: `${url}/SayHello?wsdl`,
       method: 'GET',
       headers: {
-        "Content-Type": 'text/xml; charset="utf-8"'
+        'Content-Type': 'text/xml; charset="utf-8"'
       }
-    }, function (err, response, body) {
+    }, (err, response, body) => {
       if (err) {
         throw err;
       }
@@ -90,18 +90,18 @@ describe('Express server without middleware', function () {
     });
   });
 
-  it('should handle other routes as usual', function (done) {
-    expressServer.route('/test/r1').get(function (req, res, next) {
-      //make sure next() works as well
+  it('should handle other routes as usual', done => {
+    expressServer.route('/test/r1').get((req, res, next) => {
+      // make sure next() works as well
       return next();
-    }, function (req, res) {
+    }, (req, res) => {
       return res.status(200).send('test passed');
     });
 
     request({
-      url: url + '/test/r1',
+      url: `${url}/test/r1`,
       method: 'GET'
-    }, function (err, response, body) {
+    }, (err, response, body) => {
       if (err) {
         throw err;
       }
@@ -112,14 +112,14 @@ describe('Express server without middleware', function () {
 
 });
 
-describe('Express server with middleware', function () {
+describe('Express server with middleware', () => {
 
-  before(function (done) {
+  before(done => {
     const wsdl = '<definitions name="HelloService" targetNamespace="http://www.examples.com/wsdl/HelloService.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><message name="SayHelloRequest"><part name="firstName" type="xsd:string"/></message><message name="SayHelloResponse"><part name="greeting" type="xsd:string"/></message><portType name="Hello_PortType"><operation name="sayHello"><input message="tns:SayHelloRequest"/><output message="tns:SayHelloResponse"/></operation></portType><binding name="Hello_Binding" type="tns:Hello_PortType"><soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/><operation name="sayHello"><soap:operation soapAction="sayHello"/><input><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></input><output><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></output></operation></binding><service name="Hello_Service"><documentation>WSDL File for HelloService</documentation><port binding="tns:Hello_Binding" name="Hello_Port"><soap:address location="http://localhost:51515/SayHello/" /></port></service></definitions>';
     const service = {
       Hello_Service: {
         Hello_Port: {
-          sayHello: function (args) {
+          sayHello(args) {
             return {
               greeting: args.firstName
             };
@@ -128,35 +128,35 @@ describe('Express server with middleware', function () {
       }
     };
     expressServer = express();
-    expressServer.use(bodyParser.raw({ type: function () { return true; }, limit: '5mb' }));
+    expressServer.use(bodyParser.raw({ type() { return true; }, limit: '5mb' }));
 
-    server = expressServer.listen(51515, function () {
+    server = expressServer.listen(51515, () => {
 
       const soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
-      url = 'http://' + server.address().address + ':' + server.address().port;
+      url = `http://${server.address().address}:${server.address().port}`;
 
       if (server.address().address === '0.0.0.0' || server.address().address === '::') {
-        url = 'http://127.0.0.1:' + server.address().port;
+        url = `http://127.0.0.1:${server.address().port}`;
       }
 
       done();
     });
   });
 
-  after(function () {
+  after(() => {
     server.close();
   });
 
-  it('should allow parsing body via express middleware', function (done) {
+  it('should allow parsing body via express middleware', done => {
     request({
-      url: url + '/SayHello',
+      url: `${url}/SayHello`,
       method: 'POST',
       headers: {
-        SOAPAction: "sayHello",
-        "Content-Type": 'text/xml; charset="utf-8"'
+        SOAPAction: 'sayHello',
+        'Content-Type': 'text/xml; charset="utf-8"'
       },
       body: requestXML
-    }, function (err, response, body) {
+    }, (err, response, body) => {
       if (err) {
         throw err;
       }

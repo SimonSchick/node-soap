@@ -1,25 +1,25 @@
 'use strict';
 
-describe('BasicAuthSecurity', function() {
-  const BasicAuthSecurity = require('../../').BasicAuthSecurity;
-  const username = "admin";
-  const password = "password1234";
+describe('BasicAuthSecurity', () => {
+  const { BasicAuthSecurity } = require('../../');
+  const username = 'admin';
+  const password = 'password1234';
 
-  it('is a function', function() {
+  it('is a function', () => {
     BasicAuthSecurity.should.be.type('function');
   });
 
-  describe('defaultOption param', function() {
-    it('is accepted as the third param', function() {
+  describe('defaultOption param', () => {
+    it('is accepted as the third param', () => {
       new BasicAuthSecurity(username, password, {});
     });
 
-    it('is used in addOptions', function() {
+    it('is used in addOptions', () => {
       const options = {};
       const defaultOptions = { foo: 3 };
       const instance = new BasicAuthSecurity(username, password, defaultOptions);
       instance.addOptions(options);
-      options.should.have.property("foo", 3);
+      options.should.have.property('foo', 3);
     });
   });
 });

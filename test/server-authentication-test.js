@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const fs = require('fs');
 const soap = require('..');
@@ -16,47 +16,47 @@ test.authenticateProxy = function authenticate(security, callback) {
 test.service = {
   StockQuoteService: {
     StockQuotePort: {
-      GetLastTradePrice: function(args, cb, soapHeader) {
+      GetLastTradePrice(args, cb, soapHeader) {
         return { price: 19.56 };
       }
     }
   }
 };
 
-describe('SOAP Server', function() {
-  before(function(done) {
-    fs.readFile(__dirname + '/wsdl/strict/stockquote.wsdl', 'utf8', function(err, data) {
+describe('SOAP Server', () => {
+  before(done => {
+    fs.readFile(`${__dirname}/wsdl/strict/stockquote.wsdl`, 'utf8', (err, data) => {
       assert.ifError(err);
       test.wsdl = data;
       done();
     });
   });
 
-  beforeEach(function(done) {
-    test.server = http.createServer(function(req, res) {
+  beforeEach(done => {
+    test.server = http.createServer((req, res) => {
       res.statusCode = 404;
       res.end();
     });
 
-    test.server.listen(15099, null, null, function() {
+    test.server.listen(15099, null, null, () => {
       test.soapServer = soap.listen(test.server, '/stockquote', test.service, test.wsdl);
       test.soapServer.authenticate = test.authenticateProxy;
       test.baseUrl =
-        'http://' + test.server.address().address + ":" + test.server.address().port;
+        `http://${test.server.address().address}:${test.server.address().port}`;
 
-      //windows return 0.0.0.0 as address and that is not
-      //valid to use in a request
+      // windows return 0.0.0.0 as address and that is not
+      // valid to use in a request
       if (test.server.address().address === '0.0.0.0' || test.server.address().address === '::') {
         test.baseUrl =
-          'http://127.0.0.1:' + test.server.address().port;
+          `http://127.0.0.1:${test.server.address().port}`;
       }
 
       done();
     });
   });
 
-  afterEach(function(done) {
-    test.server.close(function() {
+  afterEach(done => {
+    test.server.close(() => {
       test.server = null;
       test.authenticate = null;
       delete test.soapServer;
@@ -65,18 +65,18 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should succeed on valid synchronous authentication', function(done) {
+  it('should succeed on valid synchronous authentication', done => {
     test.authenticate = function(security, callback) {
-      setTimeout(function delayed() {
+      setTimeout(() => {
         callback(false); // Ignored
       }, 10);
       return true;
     };
 
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
 
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         assert.equal(19.56, parseFloat(result.price));
         done();
@@ -84,18 +84,18 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should succeed on valid asynchronous authentication', function(done) {
+  it('should succeed on valid asynchronous authentication', done => {
     test.authenticate = function(security, callback) {
-      setTimeout(function delayed() {
+      setTimeout(() => {
         callback(true);
       }, 10);
       return null; // Ignored
     };
 
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
 
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         assert.equal(19.56, parseFloat(result.price));
         done();
@@ -103,18 +103,18 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should fail on invalid synchronous authentication', function(done) {
+  it('should fail on invalid synchronous authentication', done => {
     test.authenticate = function(security, callback) {
-      setTimeout(function delayed() {
+      setTimeout(() => {
         callback(true); // Ignored
       }, 10);
       return false;
     };
 
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
 
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function (err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ok(err);
         assert.ok(err.root.Envelope.Body.Fault.Code.Value);
         assert.equal(err.root.Envelope.Body.Fault.Code.Value, 'SOAP-ENV:Client');
@@ -125,17 +125,17 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should fail on invalid asynchronous authentication', function(done) {
+  it('should fail on invalid asynchronous authentication', done => {
     test.authenticate = function(security, callback) {
-      setTimeout(function delayed() {
+      setTimeout(() => {
         callback(false);
       }, 10);
     };
 
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
 
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function (err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ok(err);
         assert.ok(err.root.Envelope.Body.Fault.Code.Value);
         assert.equal(err.root.Envelope.Body.Fault.Code.Value, 'SOAP-ENV:Client');

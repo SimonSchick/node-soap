@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const fs = require('fs');
 const soap = require('..');
@@ -12,9 +12,9 @@ test.server = null;
 test.service = {
   StockQuoteService: {
     StockQuotePort: {
-      GetLastTradePrice: function(args, cb, soapHeader) {
+      GetLastTradePrice(args, cb, soapHeader) {
         if (soapHeader)
-          return { price: soapHeader.SomeToken };
+        {return { price: soapHeader.SomeToken };}
         if (args.tickerSymbol === 'trigger error') {
           throw new Error('triggered server error');
         } else if (args.tickerSymbol === 'Async') {
@@ -23,17 +23,17 @@ test.service = {
           throw {
             Fault: {
               Code: {
-                Value: "soap:Sender",
-                Subcode: { value: "rpc:BadArguments" }
+                Value: 'soap:Sender',
+                Subcode: { value: 'rpc:BadArguments' }
               },
-              Reason: { Text: "Processing Error" }
+              Reason: { Text: 'Processing Error' }
             }
           };
         } else if (args.tickerSymbol === 'SOAP Fault v1.1') {
           throw {
             Fault: {
-              faultcode: "soap:Client.BadArguments",
-              faultstring: "Error while processing arguments"
+              faultcode: 'soap:Client.BadArguments',
+              faultstring: 'Error while processing arguments'
             }
           };
         } else {
@@ -41,25 +41,25 @@ test.service = {
         }
       },
 
-      SetTradePrice: function(args, cb, soapHeader) {
+      SetTradePrice(args, cb, soapHeader) {
       },
 
-      IsValidPrice: function(args, cb, soapHeader, req) {
+      IsValidPrice(args, cb, soapHeader, req) {
         lastReqAddress = req.connection.remoteAddress;
 
         const validationError = {
           Fault: {
             Code: {
-              Value: "soap:Sender",
-              Subcode: { value: "rpc:BadArguments" }
+              Value: 'soap:Sender',
+              Subcode: { value: 'rpc:BadArguments' }
             },
-            Reason: { Text: "Processing Error" },
+            Reason: { Text: 'Processing Error' },
             statusCode: 500
           }
         };
 
         const isValidPrice = function() {
-          let price = args.price;
+          let { price } = args;
           if(isNaN(price) || (price === ' ')) {
             return cb(validationError);
           }
@@ -75,39 +75,39 @@ test.service = {
   }
 };
 
-describe('SOAP Server', function() {
-  before(function(done) {
-    fs.readFile(__dirname + '/wsdl/strict/stockquote.wsdl', 'utf8', function(err, data) {
+describe('SOAP Server', () => {
+  before(done => {
+    fs.readFile(`${__dirname}/wsdl/strict/stockquote.wsdl`, 'utf8', (err, data) => {
       assert.ifError(err);
       test.wsdl = data;
       done();
     });
   });
 
-  beforeEach(function(done) {
-    test.server = http.createServer(function(req, res) {
+  beforeEach(done => {
+    test.server = http.createServer((req, res) => {
       res.statusCode = 404;
       res.end();
     });
 
-    test.server.listen(15099, null, null, function() {
+    test.server.listen(15099, null, null, () => {
       test.soapServer = soap.listen(test.server, '/stockquote', test.service, test.wsdl);
       test.baseUrl =
-        'http://' + test.server.address().address + ":" + test.server.address().port;
+        `http://${test.server.address().address}:${test.server.address().port}`;
 
-      //windows return 0.0.0.0 as address and that is not
-      //valid to use in a request
+      // windows return 0.0.0.0 as address and that is not
+      // valid to use in a request
       if (test.server.address().address === '0.0.0.0' || test.server.address().address === '::') {
         test.baseUrl =
-          'http://127.0.0.1:' + test.server.address().port;
+          `http://127.0.0.1:${test.server.address().port}`;
       }
 
       done();
     });
   });
 
-  afterEach(function(done) {
-    test.server.close(function() {
+  afterEach(done => {
+    test.server.close(() => {
       test.server = null;
       delete test.soapServer;
       test.soapServer = null;
@@ -116,7 +116,7 @@ describe('SOAP Server', function() {
   });
 
 
-  it('should add and clear response soap headers', function(done) {
+  it('should add and clear response soap headers', done => {
     assert.ok(!test.soapServer.getSoapHeaders());
 
     const i1 = test.soapServer.addSoapHeader('about-to-change-1');
@@ -136,24 +136,24 @@ describe('SOAP Server', function() {
     done();
   });
 
-  it('should return predefined headers in response', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
-      const clientArgs = { tickerSymbol: 'AAPL'};
+  it('should return predefined headers in response', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
+      const clientArgs = { tickerSymbol: 'AAPL' };
 
       assert.ifError(err);
       test.soapServer.addSoapHeader('<header1>ONE</header1>');
       test.soapServer.changeSoapHeader(1, { header2: 'TWO' });
-      test.soapServer.addSoapHeader(function() { return { header3: 'THREE' }; });
+      test.soapServer.addSoapHeader(() => { return { header3: 'THREE' }; });
 
       client.addSoapHeader({ headerFromClient: 'FOUR' });
-      test.soapServer.changeSoapHeader(3, function(methodName, args, headers, req) {
+      test.soapServer.changeSoapHeader(3, (methodName, args, headers, req) => {
         assert.equal(methodName, 'GetLastTradePrice');
         assert.deepEqual(clientArgs, args);
         assert.deepEqual(headers, { headerFromClient: 'FOUR' });
         return { header4: headers.headerFromClient };
       });
 
-      client.GetLastTradePrice(clientArgs, function(err, result, raw, headers) {
+      client.GetLastTradePrice(clientArgs, (err, result, raw, headers) => {
         assert.ifError(err);
         assert.deepEqual(headers, {
           header1: 'ONE',
@@ -166,25 +166,25 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should be running', function(done) {
-    request(test.baseUrl, function(err, res, body) {
+  it('should be running', done => {
+    request(test.baseUrl, (err, res, body) => {
       assert.ifError(err);
       done();
     });
   });
 
-  it('should 404 on non-WSDL path', function(done) {
-    request(test.baseUrl, function(err, res, body) {
+  it('should 404 on non-WSDL path', done => {
+    request(test.baseUrl, (err, res, body) => {
       assert.ifError(err);
       assert.equal(res.statusCode, 404);
       done();
     });
   });
 
-  it('should 500 on wrong message', function(done) {
+  it('should 500 on wrong message', done => {
     request.post({
-        url: test.baseUrl + '/stockquote?wsdl',
-        body : '<soapenv:Envelope' +
+      url: `${test.baseUrl}/stockquote?wsdl`,
+      body : '<soapenv:Envelope' +
                     ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"' +
                     ' xmlns:soap="http://service.applicationsnet.com/soap/">' +
                 '  <soapenv:Header/>' +
@@ -192,51 +192,51 @@ describe('SOAP Server', function() {
                 '    <soap:WrongTag/>' +
                 '  </soapenv:Body>' +
                 '</soapenv:Envelope>',
-        headers: {'Content-Type': 'text/xml'}
-      }, function(err, res, body) {
-        assert.ifError(err);
-        assert.equal(res.statusCode, 500);
-        assert.ok(body.length);
-        done();
-      }
+      headers: { 'Content-Type': 'text/xml' }
+    }, (err, res, body) => {
+      assert.ifError(err);
+      assert.equal(res.statusCode, 500);
+      assert.ok(body.length);
+      done();
+    }
     );
   });
 
-  it('should 500 on empty message and undefined Content-Type', function(done) {
+  it('should 500 on empty message and undefined Content-Type', done => {
     request.post({
-        url: test.baseUrl + '/stockquote?wsdl',
-        body : '',
-        headers: {'Content-Type': undefined}
-      }, function(err, res, body) {
-        assert.ifError(err);
-        assert.equal(res.statusCode, 500);
-        assert.ok(body.length);
-        done();
-      }
+      url: `${test.baseUrl}/stockquote?wsdl`,
+      body : '',
+      headers: { 'Content-Type': undefined }
+    }, (err, res, body) => {
+      assert.ifError(err);
+      assert.equal(res.statusCode, 500);
+      assert.ok(body.length);
+      done();
+    }
     );
   });
 
-  it('should 500 on missing tag message', function(done) {
+  it('should 500 on missing tag message', done => {
     request.post({
-        url: test.baseUrl + '/stockquote?wsdl',
-        body : '<soapenv:Envelope' +
+      url: `${test.baseUrl}/stockquote?wsdl`,
+      body : '<soapenv:Envelope' +
                     ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"' +
                     ' xmlns:soap="http://service.applicationsnet.com/soap/">' +
                 '  <soapenv:Header/>' +
                 '  <soapenv:Body>' +
                 '</soapenv:Envelope>',
-        headers: {'Content-Type': 'text/xml'}
-      }, function(err, res, body) {
-        assert.ifError(err);
-        assert.equal(res.statusCode, 500);
-        assert.ok(body.length);
-        done();
-      }
+      headers: { 'Content-Type': 'text/xml' }
+    }, (err, res, body) => {
+      assert.ifError(err);
+      assert.equal(res.statusCode, 500);
+      assert.ok(body.length);
+      done();
+    }
     );
   });
 
-  it('should server up WSDL', function(done) {
-    request(test.baseUrl + '/stockquote?wsdl', function(err, res, body) {
+  it('should server up WSDL', done => {
+    request(`${test.baseUrl}/stockquote?wsdl`, (err, res, body) => {
       assert.ifError(err);
       assert.equal(res.statusCode, 200);
       assert.ok(body.length);
@@ -244,20 +244,20 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should return complete client description', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return complete client description', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       const description = client.describe();
-      const expected = { input: { tickerSymbol: "string" }, output:{ price: "float" } };
-      assert.deepEqual(expected , description.StockQuoteService.StockQuotePort.GetLastTradePrice);
+      const expected = { input: { tickerSymbol: 'string' }, output:{ price: 'float' } };
+      assert.deepEqual(expected, description.StockQuoteService.StockQuotePort.GetLastTradePrice);
       done();
     });
   });
 
-  it('should return correct results', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return correct results', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         assert.equal(19.56, parseFloat(result.price));
         done();
@@ -265,10 +265,10 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should return correct async results (single argument callback style)', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return correct async results (single argument callback style)', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'Async'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'Async' }, (err, result) => {
         assert.ifError(err);
         assert.equal(19.56, parseFloat(result.price));
         done();
@@ -277,10 +277,10 @@ describe('SOAP Server', function() {
   });
 
 
-  it('should return correct async results (double argument callback style)', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return correct async results (double argument callback style)', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.IsValidPrice({ price: 50000 }, function(err, result) {
+      client.IsValidPrice({ price: 50000 }, (err, result) => {
         assert.ifError(err);
         assert.equal(true, !!(result.valid));
         done();
@@ -288,10 +288,10 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should pass the original req to async methods', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should pass the original req to async methods', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.IsValidPrice({ price: 50000 }, function(err, result) {
+      client.IsValidPrice({ price: 50000 }, (err, result) => {
         // node V3.x+ reports addresses as IPV6
         const addressParts = lastReqAddress.split(':');
         assert.equal(addressParts[(addressParts.length - 1)], '127.0.0.1');
@@ -300,10 +300,10 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should return correct async errors', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return correct async errors', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.IsValidPrice({ price: "invalid_price"}, function(err, result) {
+      client.IsValidPrice({ price: 'invalid_price' }, (err, result) => {
         assert.ok(err);
         assert.ok(err.root.Envelope.Body.Fault);
         assert.equal(err.response.statusCode, 500);
@@ -312,11 +312,11 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should handle headers in request', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should handle headers in request', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       client.addSoapHeader('<SomeToken>123.45</SomeToken>');
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         assert.equal(123.45, parseFloat(result.price));
         done();
@@ -324,11 +324,11 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should return security timestamp in response', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return security timestamp in response', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       client.addSoapHeader('<Security><Timestamp><Created>2015-02-23T12:00:00.000Z</Created><Expires>2015-02-23T12:05:00.000Z</Expires></Timestamp></Security>');
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result, raw, soapHeader) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result, raw, soapHeader) => {
         assert.ifError(err);
         assert.ok(soapHeader && soapHeader.Security && soapHeader.Security.Timestamp);
         done();
@@ -336,26 +336,26 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should emit \'request\' event', function(done) {
-    test.soapServer.on('request', function requestManager(request, methodName) {
+  it('should emit \'request\' event', done => {
+    test.soapServer.on('request', (request, methodName) => {
       assert.equal(methodName, 'GetLastTradePrice');
       done();
     });
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function() {});
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, () => {});
     });
   });
 
-  it('should emit \'headers\' event', function(done) {
-    test.soapServer.on('headers', function headersManager(headers, methodName) {
+  it('should emit \'headers\' event', done => {
+    test.soapServer.on('headers', (headers, methodName) => {
       assert.equal(methodName, 'GetLastTradePrice');
       headers.SomeToken = 0;
     });
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       client.addSoapHeader('<SomeToken>123.45</SomeToken>');
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         assert.equal(0, parseFloat(result.price));
         done();
@@ -363,23 +363,23 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should not emit the \'headers\' event when there are no headers', function(done) {
-    test.soapServer.on('headers', function headersManager(headers, methodName) {
+  it('should not emit the \'headers\' event when there are no headers', done => {
+    test.soapServer.on('headers', (headers, methodName) => {
       assert.ok(false);
     });
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ifError(err);
         done();
       });
     });
   });
 
-  it('should include response and body in error object', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should include response and body in error object', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'trigger error' }, function(err, response, body) {
+      client.GetLastTradePrice({ tickerSymbol: 'trigger error' }, (err, response, body) => {
         assert.ok(err);
         assert.strictEqual(err.response, response);
         assert.strictEqual(err.body, body);
@@ -388,60 +388,60 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should return SOAP Fault body for SOAP 1.2', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return SOAP Fault body for SOAP 1.2', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.2' }, function(err, response, body) {
+      client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.2' }, (err, response, body) => {
         assert.ok(err);
         const fault = err.root.Envelope.Body.Fault;
-        assert.equal(err.message, fault.faultcode + ': ' + fault.faultstring);
-        assert.equal(fault.Code.Value, "soap:Sender");
-        assert.equal(fault.Reason.Text, "Processing Error");
+        assert.equal(err.message, `${fault.faultcode}: ${fault.faultstring}`);
+        assert.equal(fault.Code.Value, 'soap:Sender');
+        assert.equal(fault.Reason.Text, 'Processing Error');
         // Verify namespace on elements set according to fault spec 1.2
         assert.ok(body.match(/<soap:Code>.*<\/soap:Code>/g),
-          "Body should contain Code-element with namespace");
+          'Body should contain Code-element with namespace');
         assert.ok(body.match(/<soap:Reason>.*<\/soap:Reason>/g),
-          "Body should contain Reason-element with namespace");
+          'Body should contain Reason-element with namespace');
         assert.equal(err.response.statusCode, 200);
         done();
       });
     });
   });
 
-  it('should return SOAP Fault body for SOAP 1.1', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should return SOAP Fault body for SOAP 1.1', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.1' }, function(err, response, body) {
+      client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.1' }, (err, response, body) => {
         assert.ok(err);
         const fault = err.root.Envelope.Body.Fault;
-        assert.equal(err.message, fault.faultcode + ': ' + fault.faultstring);
-        assert.equal(fault.faultcode, "soap:Client.BadArguments");
-        assert.equal(fault.faultstring, "Error while processing arguments");
+        assert.equal(err.message, `${fault.faultcode}: ${fault.faultstring}`);
+        assert.equal(fault.faultcode, 'soap:Client.BadArguments');
+        assert.equal(fault.faultstring, 'Error while processing arguments');
         // Verify namespace on elements set according to fault spec 1.1
         assert.ok(body.match(/<faultcode>.*<\/faultcode>/g),
-          "Body should contain faultcode-element without namespace");
+          'Body should contain faultcode-element without namespace');
         assert.ok(body.match(/<faultstring>.*<\/faultstring>/g),
-          "Body should contain faultstring-element without namespace");
+          'Body should contain faultstring-element without namespace');
         done();
       });
     });
   });
 
-  it('should return SOAP Fault thrown from \'headers\' event handler', function(done) {
-    test.soapServer.on('headers', function headersManager() {
+  it('should return SOAP Fault thrown from \'headers\' event handler', done => {
+    test.soapServer.on('headers', () => {
       throw {
         Fault: {
           Code: {
-            Value: "soap:Sender",
-            Subcode: { value: "rpc:BadArguments" }
+            Value: 'soap:Sender',
+            Subcode: { value: 'rpc:BadArguments' }
           },
-          Reason: { Text: "Processing Error" }
+          Reason: { Text: 'Processing Error' }
         }
       };
     });
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       client.addSoapHeader('<SomeToken>0.0</SomeToken>');
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL'}, function(err, result) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, result) => {
         assert.ok(err);
         assert.ok(err.root.Envelope.Body.Fault);
         done();
@@ -449,35 +449,35 @@ describe('SOAP Server', function() {
     });
   });
 
-  it('should accept attributes as a string on the body element', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should accept attributes as a string on the body element', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       client.addBodyAttribute('xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="######################"');
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, function(err, response, body) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, response, body) => {
         assert.ifError(err);
         done();
       });
     });
   });
 
-  it('should accept attributes as an object on the body element', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should accept attributes as an object on the body element', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       const attributes = { 'xmlns:wsu': 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd', 'wsu:Id': '######################' };
       client.addBodyAttribute(attributes);
-      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, function(err, response, body) {
+      client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, (err, response, body) => {
         assert.ifError(err);
         done();
       });
     });
   });
 
-  it('should handle one-way operations', function(done) {
-    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+  it('should handle one-way operations', done => {
+    soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
-      client.SetTradePrice({ tickerSymbol: 'GOOG', price: 575.33 }, function(err, result) {
+      client.SetTradePrice({ tickerSymbol: 'GOOG', price: 575.33 }, (err, result) => {
         assert.ifError(err);
-        assert.equal(result,null);
+        assert.equal(result, null);
         done();
       });
     });
