@@ -3,7 +3,7 @@
   "version": "0.24.0",
   "description": "A minimal node SOAP client",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=6.0.0"
   },
   "author": "Vinay Pulim <v@pulim.com>",
   "dependencies": {
@@ -11,13 +11,11 @@
     "concat-stream": "^1.5.1",
     "debug": "^2.6.9",
     "ejs": "~2.5.5",
-    "finalhandler": "^1.0.3",
-    "lodash": "^4.17.5",
     "httpntlm": "^1.5.2",
+    "lodash": "^4.17.5",
     "request": ">=2.9.0",
     "sax": ">=0.6",
-    "serve-static": "^1.11.1",
-    "strip-bom": "~0.3.1",
+    "strip-bom": "^3.0.0",
     "uuid": "^3.1.0",
     "xml-crypto": "~0.8.0"
   },
@@ -32,7 +30,6 @@
   },
   "scripts": {
     "toc": "./node_modules/.bin/doctoc Readme.md --github --maxlevel 3",
-    "pretest": "jshint index.js lib test",
     "cover": "nyc --reporter=lcov --reporter=html --reporter=text mocha  test/*-test.js test/security/*.js",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js -v",
     "test": "mocha --timeout 10000 test/*-test.js test/security/*.js"
@@ -49,13 +46,15 @@
     "diff": "^2.2.1",
     "doctoc": "^1.0.0",
     "duplexer": "~0.1.1",
+    "eslint": "^4.19.1",
     "express": "^4.14.0",
+    "finalhandler": "^1.0.3",
     "glob": "~3.2.8",
-    "jshint": "2.3.0",
-    "mocha": "~1.17.0",
+    "mocha": "^5.2.0",
     "nyc": "^11.4.1",
     "readable-stream": "~2.0.2",
     "semver": "~5.0.3",
+    "serve-static": "^1.11.1",
     "should": "~3.3.0",
     "sinon": "^1.17.5",
     "timekeeper": "~0.0.4"
