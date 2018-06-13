@@ -1,12 +1,12 @@
 'use strict';
 
-var fs = require('fs'),
-    soap = require('..'),
-    http = require('http'),
-    assert = require('assert');
+const fs = require('fs');
+const soap = require('..');
+const http = require('http');
+const assert = require('assert');
 
 describe('SOAP Client', function() {
-  var options = {
+  const options = {
     'ignoredNamespaces': {
       'namespaces': ['ignoreThisNS'],
       'override': true

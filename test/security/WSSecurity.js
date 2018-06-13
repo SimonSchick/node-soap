@@ -1,24 +1,24 @@
 'use strict';
 
-var fs = require('fs'),
-  join = require('path').join;
+const fs = require('fs');
+const { join } = require('path');
 
 describe('WSSecurity', function() {
-  var WSSecurity = require('../../').WSSecurity;
+  const WSSecurity = require('../../').WSSecurity;
 
   it('is a function', function() {
     WSSecurity.should.be.type('function');
   });
 
   it('should accept valid constructor variables', function() {
-    var username = 'myUser';
-    var password = 'myPass';
-    var options = {
+    const username = 'myUser';
+    const password = 'myPass';
+    const options = {
       passwordType: 'PasswordText',
       hasNonce: true,
       actor: 'urn:sample'
     };
-    var instance = new WSSecurity(username, password, options);
+    const instance = new WSSecurity(username, password, options);
     instance.should.have.property('_username', username);
     instance.should.have.property('_password', password);
     instance.should.have.property('_passwordType', options.passwordType);
@@ -27,10 +27,10 @@ describe('WSSecurity', function() {
   });
 
   it('should accept passwordType as 3rd arg', function() {
-    var username = 'myUser';
-    var password = 'myPass';
-    var passwordType = 'PasswordText';
-    var instance = new WSSecurity(username, password, passwordType);
+    const username = 'myUser';
+    const password = 'myPass';
+    const passwordType = 'PasswordText';
+    const instance = new WSSecurity(username, password, passwordType);
     instance.should.have.property('_username', username);
     instance.should.have.property('_password', password);
     instance.should.have.property('_passwordType', passwordType);
@@ -39,15 +39,15 @@ describe('WSSecurity', function() {
   });
 
   it('should insert a WSSecurity when postProcess is called', function() {
-    var username = 'myUser';
-    var password = 'myPass';
-    var options = {
+    const username = 'myUser';
+    const password = 'myPass';
+    const options = {
       passwordType: 'PassWordText',
       hasNonce: true,
       actor: 'urn:sample'
     };
-    var instance = new WSSecurity(username, password, options);
-    var xml = instance.toXML();
+    const instance = new WSSecurity(username, password, options);
+    const xml = instance.toXML();
 
     xml.should.containEql('<wsse:Security soap:actor="urn:sample" ');
     xml.should.containEql('xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" ');

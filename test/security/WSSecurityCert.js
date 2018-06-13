@@ -1,30 +1,30 @@
 'use strict';
 
-var fs = require('fs'),
-  join = require('path').join;
+const fs = require('fs');
+const { join } = require('path');
 
 describe('WSSecurityCert', function() {
-  var WSSecurityCert = require('../../').WSSecurityCert;
-  var cert = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-cert.pem'));
-  var key = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-key.pem'));
-  var keyWithPassword = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-key-with-password.pem')); // The passphrase protecting the private key is "soap"
+  const { WSSecurityCert } = require('../../');
+  const cert = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-cert.pem'));
+  const key = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-key.pem'));
+  const keyWithPassword = fs.readFileSync(join(__dirname, '..', 'certs', 'agent2-key-with-password.pem')); // The passphrase protecting the private key is "soap"
 
   it('is a function', function() {
     WSSecurityCert.should.be.type('function');
   });
 
   it('should accept valid constructor variables', function() {
-    var instance = new WSSecurityCert(key, cert, '');
+    const instance = new WSSecurityCert(key, cert, '');
     instance.should.have.property('publicP12PEM');
     instance.should.have.property('signer');
     instance.should.have.property('x509Id');
   });
 
   it('should fail at computing signature when the private key is invalid', function() {
-    var passed = true;
+    let passed = true;
 
     try {
-      var instance = new WSSecurityCert('*****', cert, '');
+      const instance = new WSSecurityCert('*****', cert, '');
       instance.postProcess('<soap:Header></soap:Header><soap:Body></soap:Body>', 'soap');
     } catch(e) {
       passed = false;
@@ -36,8 +36,8 @@ describe('WSSecurityCert', function() {
   });
 
   it('should insert a WSSecurity signing block when postProcess is called (private key is raw)', function() {
-    var instance = new WSSecurityCert(key, cert, '');
-    var xml = instance.postProcess('<soap:Header></soap:Header><soap:Body></soap:Body>', 'soap');
+    const instance = new WSSecurityCert(key, cert, '');
+    const xml = instance.postProcess('<soap:Header></soap:Header><soap:Body></soap:Body>', 'soap');
 
     xml.should.containEql('<wsse:Security');
     xml.should.containEql('http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd');
@@ -60,8 +60,8 @@ describe('WSSecurityCert', function() {
   });
   
   it('should insert a WSSecurity signing block when postProcess is called (private key is protected by a passphrase)', function() {
-    var instance = new WSSecurityCert(keyWithPassword, cert, 'soap');
-    var xml = instance.postProcess('<soap:Header></soap:Header><soap:Body></soap:Body>', 'soap');
+    const instance = new WSSecurityCert(keyWithPassword, cert, 'soap');
+    const xml = instance.postProcess('<soap:Header></soap:Header><soap:Body></soap:Body>', 'soap');
 
     xml.should.containEql('<wsse:Security');
     xml.should.containEql('http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd');
@@ -84,8 +84,8 @@ describe('WSSecurityCert', function() {
   });
 
   it('should only add two Reference elements, for Soap Body and Timestamp inside wsse:Security element', function() {
-    var instance = new WSSecurityCert(key, cert, '');
-    var xml = instance.postProcess('<soap:Header></soap:Header><soap:Body><Body></Body><Timestamp></Timestamp></soap:Body>', 'soap');
+    const instance = new WSSecurityCert(key, cert, '');
+    const xml = instance.postProcess('<soap:Header></soap:Header><soap:Body><Body></Body><Timestamp></Timestamp></soap:Body>', 'soap');
 
     xml.match(/<Reference URI="#/g).should.have.length(2);
   });

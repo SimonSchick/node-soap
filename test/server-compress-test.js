@@ -1,22 +1,22 @@
 'use strict';
 
-var fs = require('fs');
-var soap = require('..');
-var assert = require('assert');
+const fs = require('fs');
+const soap = require('..');
+const assert = require('assert');
 
-var http = require('http');
-var zlib = require('zlib');
+const http = require('http');
+const zlib = require('zlib');
 
-var path = 'test/request-response-samples/DefaultNamespace__no_xmlns_prefix_used_for_default_namespace/';
+const path = 'test/request-response-samples/DefaultNamespace__no_xmlns_prefix_used_for_default_namespace/';
 
-var wsdl = path + 'soap.wsdl';
+const wsdl = path + 'soap.wsdl';
 
-var xml = fs.readFileSync(path + '/soap.wsdl', 'utf8');
-var json = fs.readFileSync(path + '/request.json', 'utf8');
-var request = fs.readFileSync(path + '/request.xml', 'utf8');
-var response = fs.readFileSync(path + '/response.xml', 'utf8');
+const xml = fs.readFileSync(path + '/soap.wsdl', 'utf8');
+const json = fs.readFileSync(path + '/request.json', 'utf8');
+const request = fs.readFileSync(path + '/request.xml', 'utf8');
+const response = fs.readFileSync(path + '/response.xml', 'utf8');
 
-var service = {
+const service = {
   MyService: {
     MyServicePort: {
       DefaultNamespace: function (args) {
@@ -31,11 +31,12 @@ describe('SOAP Server', function () {
   // first request is sent through a soap client. The second request sends the
   // same request in gzipped format.
   it('should properly handle compression', function (done) {
-    var server = http.createServer();
-    var clientResponse, gzipResponse;
+    const server = http.createServer();
+    let clientResponse;
+    let gzipResponse;
 
     // If both arguments are defined, check if they are equal and exit the test.
-    var check = function (a, b) {
+    const check = function (a, b) {
       if (a && b) {
         assert(a === b);
         done();
@@ -59,7 +60,7 @@ describe('SOAP Server', function () {
         });
       });
   
-      var gzip = zlib.createGzip();
+      const gzip = zlib.createGzip();
   
       // Construct a request with the appropriate headers.
       gzip.pipe(http.request({
@@ -73,7 +74,7 @@ describe('SOAP Server', function () {
           'soapaction': '"DefaultNamespace"'
         }
       }, function (res) {
-        var body = '';
+        let body = '';
         res.on('data', function (data) {
           // Parse the response body.
           body += data;

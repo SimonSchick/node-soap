@@ -1,12 +1,12 @@
 "use strict";
 
-var fs = require('fs'),
-    soap = require('..'),
-    https = require('https'),
-    constants = require('constants'),
-    assert = require('assert');
+const fs = require('fs');
+const soap = require('..');
+const https = require('https');
+const constants = require('constants');
+const assert = require('assert');
 
-var test = {};
+const test = {};
 test.service = {
   StockQuoteService: {
     StockQuotePort: {

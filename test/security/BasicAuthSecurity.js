@@ -1,9 +1,9 @@
 'use strict';
 
 describe('BasicAuthSecurity', function() {
-  var BasicAuthSecurity = require('../../').BasicAuthSecurity;
-  var username = "admin";
-  var password = "password1234";
+  const BasicAuthSecurity = require('../../').BasicAuthSecurity;
+  const username = "admin";
+  const password = "password1234";
 
   it('is a function', function() {
     BasicAuthSecurity.should.be.type('function');
@@ -15,9 +15,9 @@ describe('BasicAuthSecurity', function() {
     });
 
     it('is used in addOptions', function() {
-      var options = {};
-      var defaultOptions = { foo: 3 };
-      var instance = new BasicAuthSecurity(username, password, defaultOptions);
+      const options = {};
+      const defaultOptions = { foo: 3 };
+      const instance = new BasicAuthSecurity(username, password, defaultOptions);
       instance.addOptions(options);
       options.should.have.property("foo", 3);
     });

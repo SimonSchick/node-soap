@@ -1,23 +1,23 @@
 'use strict';
 
-var request = require('request');
-var assert = require('assert');
-var express = require('express');
-var bodyParser = require('body-parser');
-var soap = require('../');
-var expressServer;
-var server;
-var port;
-var url;
-var wsdl = '<definitions name="HelloService" targetNamespace="http://www.examples.com/wsdl/HelloService.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><message name="SayHelloRequest"><part name="firstName" type="xsd:string"/></message><message name="SayHelloResponse"><part name="greeting" type="xsd:string"/></message><portType name="Hello_PortType"><operation name="sayHello"><input message="tns:SayHelloRequest"/><output message="tns:SayHelloResponse"/></operation></portType><binding name="Hello_Binding" type="tns:Hello_PortType"><soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/><operation name="sayHello"><soap:operation soapAction="sayHello"/><input><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></input><output><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></output></operation></binding><service name="Hello_Service"><documentation>WSDL File for HelloService</documentation><port binding="tns:Hello_Binding" name="Hello_Port"><soap:address location="http://localhost:51515/SayHello/" /></port></service></definitions>';
-var requestXML = '<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">' +
+const request = require('request');
+const assert = require('assert');
+const express = require('express');
+const bodyParser = require('body-parser');
+const soap = require('../');
+let expressServer;
+let server;
+let port;
+let url;
+const wsdl = '<definitions name="HelloService" targetNamespace="http://www.examples.com/wsdl/HelloService.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><message name="SayHelloRequest"><part name="firstName" type="xsd:string"/></message><message name="SayHelloResponse"><part name="greeting" type="xsd:string"/></message><portType name="Hello_PortType"><operation name="sayHello"><input message="tns:SayHelloRequest"/><output message="tns:SayHelloResponse"/></operation></portType><binding name="Hello_Binding" type="tns:Hello_PortType"><soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/><operation name="sayHello"><soap:operation soapAction="sayHello"/><input><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></input><output><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></output></operation></binding><service name="Hello_Service"><documentation>WSDL File for HelloService</documentation><port binding="tns:Hello_Binding" name="Hello_Port"><soap:address location="http://localhost:51515/SayHello/" /></port></service></definitions>';
+const requestXML = '<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">' +
   '<Body>' +
   '<sayHello xmlns="http://www.examples.com/wsdl/HelloService.wsdl">' +
   '<firstName>tarun</firstName>' +
   '</sayHello>' +
   '</Body>' +
   '</Envelope>';
-var responseXML = '<?xml version="1.0" encoding="utf-8"?>' +
+const responseXML = '<?xml version="1.0" encoding="utf-8"?>' +
   '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"  xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl">' +
   '<soap:Body>' +
   '<tns:sayHelloResponse>' +
@@ -29,7 +29,7 @@ var responseXML = '<?xml version="1.0" encoding="utf-8"?>' +
 describe('Express server without middleware', function () {
 
   before(function (done) {
-    var service = {
+    const service = {
       Hello_Service: {
         Hello_Port: {
           sayHello: function (args) {
@@ -43,7 +43,7 @@ describe('Express server without middleware', function () {
 
     expressServer = express();
     server = expressServer.listen(51515, function () {
-      var soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
+      const soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
       url = 'http://' + server.address().address + ':' + server.address().port;
       if (server.address().address === '0.0.0.0' || server.address().address === '::') {
         url = 'http://127.0.0.1:' + server.address().port;
@@ -115,8 +115,8 @@ describe('Express server without middleware', function () {
 describe('Express server with middleware', function () {
 
   before(function (done) {
-    var wsdl = '<definitions name="HelloService" targetNamespace="http://www.examples.com/wsdl/HelloService.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><message name="SayHelloRequest"><part name="firstName" type="xsd:string"/></message><message name="SayHelloResponse"><part name="greeting" type="xsd:string"/></message><portType name="Hello_PortType"><operation name="sayHello"><input message="tns:SayHelloRequest"/><output message="tns:SayHelloResponse"/></operation></portType><binding name="Hello_Binding" type="tns:Hello_PortType"><soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/><operation name="sayHello"><soap:operation soapAction="sayHello"/><input><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></input><output><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></output></operation></binding><service name="Hello_Service"><documentation>WSDL File for HelloService</documentation><port binding="tns:Hello_Binding" name="Hello_Port"><soap:address location="http://localhost:51515/SayHello/" /></port></service></definitions>';
-    var service = {
+    const wsdl = '<definitions name="HelloService" targetNamespace="http://www.examples.com/wsdl/HelloService.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.examples.com/wsdl/HelloService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><message name="SayHelloRequest"><part name="firstName" type="xsd:string"/></message><message name="SayHelloResponse"><part name="greeting" type="xsd:string"/></message><portType name="Hello_PortType"><operation name="sayHello"><input message="tns:SayHelloRequest"/><output message="tns:SayHelloResponse"/></operation></portType><binding name="Hello_Binding" type="tns:Hello_PortType"><soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/><operation name="sayHello"><soap:operation soapAction="sayHello"/><input><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></input><output><soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:examples:helloservice" use="encoded"/></output></operation></binding><service name="Hello_Service"><documentation>WSDL File for HelloService</documentation><port binding="tns:Hello_Binding" name="Hello_Port"><soap:address location="http://localhost:51515/SayHello/" /></port></service></definitions>';
+    const service = {
       Hello_Service: {
         Hello_Port: {
           sayHello: function (args) {
@@ -132,7 +132,7 @@ describe('Express server with middleware', function () {
 
     server = expressServer.listen(51515, function () {
 
-      var soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
+      const soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
       url = 'http://' + server.address().address + ':' + server.address().port;
 
       if (server.address().address === '0.0.0.0' || server.address().address === '::') {

@@ -1,11 +1,11 @@
 'use strict';
 
 describe('NTLMSecurity', function() {
-  var NTLMSecurity = require('../../').NTLMSecurity;
-  var username = "admin";
-  var password = "password1234";
-  var domain = "LOCAL";
-  var workstation = "MACHINE";
+  const NTLMSecurity = require('../../').NTLMSecurity;
+  const username = "admin";
+  const password = "password1234";
+  const domain = "LOCAL";
+  const workstation = "MACHINE";
 
   it('is a function', function() {
     NTLMSecurity.should.be.type('function');
@@ -13,13 +13,13 @@ describe('NTLMSecurity', function() {
 
   describe('constructor', function () {
     it('should optionally accept an options object as the first parameter', function () {
-      var options = {
+      const options = {
         username: username,
         password: password,
         domain: domain,
         workstation: workstation
       };
-      var instance = new NTLMSecurity(options);
+      const instance = new NTLMSecurity(options);
       instance.defaults.should.have.property('username', options.username);
       instance.defaults.should.have.property('password', options.password);
       instance.defaults.should.have.property('domain', options.domain);
@@ -28,7 +28,7 @@ describe('NTLMSecurity', function() {
     });
 
     it('should accept valid variables', function() {
-      var instance = new NTLMSecurity(username, password, domain, workstation);
+      const instance = new NTLMSecurity(username, password, domain, workstation);
       instance.defaults.should.have.property('username', username);
       instance.defaults.should.have.property('password', password);
       instance.defaults.should.have.property('domain', domain);
@@ -39,8 +39,8 @@ describe('NTLMSecurity', function() {
   
   describe('addHeaders', function () {
     it('should set connection as \'keep-alive\'', function () {
-      var headers = {};
-      var instance = new NTLMSecurity(username, password);
+      const headers = {};
+      const instance = new NTLMSecurity(username, password);
       instance.addHeaders(headers);
       headers.should.have.property('Connection', 'keep-alive');
     });
@@ -48,8 +48,8 @@ describe('NTLMSecurity', function() {
 
   describe('defaultOption param', function() {
     it('is used in addOptions', function() {
-      var options = {};
-      var instance = new NTLMSecurity(username, password);
+      const options = {};
+      const instance = new NTLMSecurity(username, password);
       instance.addOptions(options);
       options.should.have.property("username", username);
       options.should.have.property("password", password);

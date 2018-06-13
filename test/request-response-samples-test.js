@@ -1,37 +1,37 @@
 'use strict';
 
-var assert = require('assert');
-var fs   = require('fs');
-var glob   = require('glob');
-var http = require('http');
-var path = require('path');
-var timekeeper = require('timekeeper');
-var jsdiff = require('diff');
+const assert = require('assert');
+const fs   = require('fs');
+const glob   = require('glob');
+const http = require('http');
+const path = require('path');
+const timekeeper = require('timekeeper');
+const jsdiff = require('diff');
 require('colors');
-var soap = require('../');
-var WSSecurity = require('../lib/security/WSSecurity');
-var server;
-var port;
-var tests = glob.sync('./request-response-samples/*', {cwd:__dirname})
+const soap = require('../');
+const WSSecurity = require('../lib/security/WSSecurity');
+let server;
+let port;
+const tests = glob.sync('./request-response-samples/*', {cwd:__dirname})
   .map(function(node){return path.resolve(__dirname, node);})
   .filter(function(node){return fs.statSync(node).isDirectory();});
-var suite = {};
+const suite = {};
 
 function normalizeWhiteSpace(raw)
 {
-  var normalized = raw.replace(/\r\n|\r|\n/g, '');  // strip line endings
+  let normalized = raw.replace(/\r\n|\r|\n/g, '');  // strip line endings
   normalized = normalized.replace(/\s\s+/g, ' '); // convert whitespace to spaces
   normalized = normalized.replace(/> </g, '><');  // get rid of spaces between elements
   return normalized;
 }
 
-var requestContext = {
+const requestContext = {
   //set these two within each test
   expectedRequest:null,
   responseToSend:null,
   doneHandler:null,
   requestHandler:function(req, res){
-    var chunks = [];
+    const chunks = [];
     req.on('data', function(chunk){
       // ignore eol on sample files.
       chunks.push(chunk.toString().replace(/\r?\n$/m, ''));
@@ -39,14 +39,14 @@ var requestContext = {
     req.on('end', function(){
       if(!requestContext.expectedRequest)return res.end(requestContext.responseToSend);
 
-      var actualRequest = normalizeWhiteSpace(chunks.join(''));
-      var expectedRequest = normalizeWhiteSpace(requestContext.expectedRequest);
+      const actualRequest = normalizeWhiteSpace(chunks.join(''));
+      const expectedRequest = normalizeWhiteSpace(requestContext.expectedRequest);
 
       if (actualRequest !== expectedRequest) {
-        var diff = jsdiff.diffChars(actualRequest, expectedRequest);
-        var comparison = '';
+        const diff = jsdiff.diffChars(actualRequest, expectedRequest);
+        let comparison = '';
         diff.forEach(function(part) {
-          var color = 'grey';
+          let color = 'grey';
           if (part.added) { color = 'green'; }
           if (part.removed) { color = 'red'; }
           comparison += part.value[color];
@@ -66,22 +66,22 @@ var requestContext = {
 };
 
 tests.forEach(function(test){
-  var nameParts = path.basename(test).split('__');
-  var name = nameParts[1].replace(/_/g, ' ');
-  var methodName = nameParts[0];
-  var wsdl = path.resolve(test, 'soap.wsdl');
-  var headerJSON = path.resolve(test, 'header.json');
-  var securityJSON = path.resolve(test, 'security.json');
-  var requestJSON = path.resolve(test, 'request.json');
-  var requestXML = path.resolve(test, 'request.xml');
-  var responseJSON = path.resolve(test, 'response.json');
-  var responseSoapHeaderJSON = path.resolve(test, 'responseSoapHeader.json');
-  var responseJSONError = path.resolve(test, 'error_response.json');
-  var responseXML = path.resolve(test, 'response.xml');
-  var options = path.resolve(test, 'options.json');
-  var wsdlOptionsFile = path.resolve(test, 'wsdl_options.json');
-  var wsdlJSOptionsFile = path.resolve(test, 'wsdl_options.js');
-  var wsdlOptions = {};
+  const nameParts = path.basename(test).split('__');
+  const name = nameParts[1].replace(/_/g, ' ');
+  const methodName = nameParts[0];
+  const wsdl = path.resolve(test, 'soap.wsdl');
+  let headerJSON = path.resolve(test, 'header.json');
+  let securityJSON = path.resolve(test, 'security.json');
+  let requestJSON = path.resolve(test, 'request.json');
+  let requestXML = path.resolve(test, 'request.xml');
+  let responseJSON = path.resolve(test, 'response.json');
+  let responseSoapHeaderJSON = path.resolve(test, 'responseSoapHeader.json');
+  const responseJSONError = path.resolve(test, 'error_response.json');
+  let responseXML = path.resolve(test, 'response.xml');
+  let options = path.resolve(test, 'options.json');
+  const wsdlOptionsFile = path.resolve(test, 'wsdl_options.json');
+  const wsdlJSOptionsFile = path.resolve(test, 'wsdl_options.js');
+  let wsdlOptions = {};
 
   //headerJSON is optional
   if(fs.existsSync(headerJSON))headerJSON = require(headerJSON);
@@ -135,7 +135,7 @@ function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requ
       soap.createClientAsync(wsdlPath, wsdlOptions, 'http://localhost:'+port+'/Message/Message.dll?Handler=Default')
       .then(client => {
         if (headerJSON) {
-          for (var headerKey in headerJSON) {
+          for (const headerKey in headerJSON) {
             client.addSoapHeader(headerJSON[headerKey], headerKey);
           }
         }
@@ -164,9 +164,9 @@ function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requ
 
 function promiseCaller(client, methodName, requestJSON, responseJSON, responseSoapHeaderJSON, options){
   return client[methodName](requestJSON).then(function(responseArr){
-    var json = responseArr[0];
-    var body = responseArr[1];
-    var soapHeader = responseArr[2];
+    const json = responseArr[0];
+    const body = responseArr[1];
+    const soapHeader = responseArr[2];
 
     if(requestJSON){
       // assert.deepEqual(json, responseJSON);
@@ -184,7 +184,7 @@ function promiseCaller(client, methodName, requestJSON, responseJSON, responseSo
 }
 
 describe('Request Response Sampling', function() {
-  var origRandom = Math.random;
+  const origRandom = Math.random;
 
   before(function(done){
     timekeeper.freeze(Date.parse('2014-10-12T01:02:03Z'));

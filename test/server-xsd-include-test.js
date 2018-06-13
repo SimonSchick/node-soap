@@ -1,14 +1,14 @@
 "use strict";
 
-var fs = require('fs'),
-  soap = require('..'),
-  http = require('http'),
-  assert = require('assert'),
-  events = require('events'),
-  finalHandler = require('finalhandler'),
-  serveStatic = require('serve-static');
+const fs = require('fs');
+const soap = require('..');
+const http = require('http');
+const assert = require('assert');
+const events = require('events');
+const finalHandler = require('finalhandler');
+const serveStatic = require('serve-static');
 
-var test = {};
+const test = {};
 
 test.service = {
   StockQuoteService: {
@@ -34,12 +34,12 @@ describe('SOAP Server(XSD include)', function () {
   });
   
   beforeEach(function (done) {
-    var serve = serveStatic("./test/wsdl/strict");
+    const serve = serveStatic("./test/wsdl/strict");
     test.server = http.createServer(function (req, res) {
-      var done = finalHandler(req, res);
+      const done = finalHandler(req, res);
       serve(req, res, done);
     }).listen(51515, null, null, function () {
-      var pathOrOptions = '/stockquote-url';
+      const pathOrOptions = '/stockquote-url';
       test.soapServer = soap.listen(test.server, pathOrOptions, test.service, test.wsdl);
       
       test.baseUrl = 'http://' + test.server.address().address + ':' + test.server.address().port;
@@ -64,7 +64,7 @@ describe('SOAP Server(XSD include)', function () {
   
   
   it('should allow `http` in `schemaLocation` attribute in `xsd:include` tag', function (done) {
-    var url = __dirname + '/wsdl/strict/stockquote-url.wsdl';
+    const url = __dirname + '/wsdl/strict/stockquote-url.wsdl';
     
     soap.createClient(url, function (err, client) {
       assert.ifError(err);

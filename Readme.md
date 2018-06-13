@@ -97,9 +97,9 @@ If you're looking for professional help you can contact the maintainers through 
 ### soap.createClient(url[, options], callback) - create a new SOAP client from a WSDL url. Also supports a local filesystem path.
 
 ``` javascript
-  var soap = require('soap');
-  var url = 'http://example.com/wsdl?wsdl';
-  var args = {name: 'value'};
+  const soap = require('soap');
+  const url = 'http://example.com/wsdl?wsdl';
+  const args = {name: 'value'};
   soap.createClient(url, function(err, client) {
       client.MyFunction(args, function(err, result) {
           console.log(result);
@@ -111,9 +111,9 @@ This client has a built in WSDL cache. You can use the `disableCache` option to 
 ### soap.createClientAsync(url[, options]) - create a new SOAP client from a WSDL url. Also supports a local filesystem path.
 
 ``` javascript
-  var soap = require('soap');
-  var url = 'http://example.com/wsdl?wsdl';
-  var args = {name: 'value'};
+  const soap = require('soap');
+  const url = 'http://example.com/wsdl?wsdl';
+  const args = {name: 'value'};
   soap.createClientAsync(url).then((client) => {
     return client.MyFunctionAsync(args);
   }).then((result) => {
@@ -150,7 +150,7 @@ Note: for versions of node >0.10.X, you may need to specify `{connection: 'keep-
 *wsdl* is an xml string that defines the service.
 
 ``` javascript
-  var myService = {
+  const myService = {
       MyService: {
           MyPort: {
               MyFunction: function(args) {
@@ -185,10 +185,10 @@ Note: for versions of node >0.10.X, you may need to specify `{connection: 'keep-
       }
   };
 
-  var xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
+  const xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
 
   //http server example
-  var server = http.createServer(function(request,response) {
+  const server = http.createServer(function(request,response) {
       response.end('404: Not Found: ' + request.url);
   });
 
@@ -196,7 +196,7 @@ Note: for versions of node >0.10.X, you may need to specify `{connection: 'keep-
   soap.listen(server, '/wsdl', myService, xml);
 
   //express server example
-  var app = express();
+  const app = express();
   //body parser middleware are supported (optional)
   app.use(bodyParser.raw({type: function(){return true;}, limit: '5mb'}));
   app.listen(8001, function(){
@@ -221,7 +221,7 @@ Server options include the below:
 - `ciphers`: A string describing the ciphers to use or exclude, separated by  :. The default cipher suite is:
 
 ``` javascript
-var xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
+const xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
 
 soap.listen(server, {
     // Server options.
@@ -310,7 +310,7 @@ Asynchronous authentication:
 ``` javascript
   server = soap.listen(...)
   server.authenticate = function(security, callback) {
-    var created, nonce, password, user, token;
+    const created, nonce, password, user, token;
     token = security.UsernameToken, user = token.Username,
             password = token.Password, nonce = token.Nonce, created = token.Created;
 
@@ -329,7 +329,7 @@ Synchronous authentication:
 ``` javascript
   server = soap.listen(...)
   server.authenticate = function(security) {
-    var created, nonce, password, user, token;
+    const created, nonce, password, user, token;
     token = security.UsernameToken, user = token.Username,
             password = token.Password, nonce = token.Nonce, created = token.Created;
     return user === 'user' && password === soap.passwordDigest(nonce, created, 'password');
@@ -518,7 +518,7 @@ Currently, when supplying JSON args, elements may not contain both child element
 You may pass in a fully-formed XML string instead the individual elements in JSON `args` and attributes that make up the XML.  The XML string should not contain an XML declaration (e.g., `<?xml version="1.0" encoding="UTF-8"?>`) or a document type declaration (e.g., `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">`).
 
 ```
- var args = { _xml: "<ns1:MyRootElement xmlns:ns1="http://www.example.com/v1/ns1">
+ const args = { _xml: "<ns1:MyRootElement xmlns:ns1="http://www.example.com/v1/ns1">
                         <ChildElement>elementvalue</ChildElement>
                      </ns1:MyRootElement>"
             };
@@ -728,11 +728,11 @@ client.setSecurity(new soap.ClientSSLSecurityPFX(
 `WSSecurity` implements WS-Security. UsernameToken and PasswordText/PasswordDigest is supported.
 
 ``` javascript
-  var options = {
+  const options = {
     hasNonce: true,
     actor: 'actor'
   };
-  var wsSecurity = new soap.WSSecurity('username', 'password', options)
+  const wsSecurity = new soap.WSSecurity('username', 'password', options)
   client.setSecurity(wsSecurity);
 ```
 the `options` object is optional and can contain the following properties:
@@ -748,10 +748,10 @@ the `options` object is optional and can contain the following properties:
 WS-Security X509 Certificate support.
 
 ``` javascript
-  var privateKey = fs.readFileSync(privateKeyPath);
-  var publicKey = fs.readFileSync(publicKeyPath);
-  var password = ''; // optional password
-  var wsSecurity = new soap.WSSecurityCert(privateKey, publicKey, password);
+  const privateKey = fs.readFileSync(privateKeyPath);
+  const publicKey = fs.readFileSync(publicKeyPath);
+  const password = ''; // optional password
+  const wsSecurity = new soap.WSSecurityCert(privateKey, publicKey, password);
   client.setSecurity(wsSecurity);
 ```
 
@@ -763,7 +763,7 @@ Parameter invocation:
 ```
 This can also be set up with a JSON object, substituting values as appropriate, for example:
 ``` javascript
-  var loginData = {username: 'username', password: 'password', domain: 'domain', workstation: 'workstation'};
+  const loginData = {username: 'username', password: 'password', domain: 'domain', workstation: 'workstation'};
   client.setSecurity(new soap.NTLMSecurity(loginData));
 ```
 
@@ -772,7 +772,7 @@ Sometimes it is necessary to override the default behaviour of `node-soap` in or
 of your code base or a third library you use. Therefore you can use the `wsdlOptions` Object, which is passed in the
 `#createClient()` method and could have any (or all) of the following contents:
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   attributesKey: 'theAttrs',
   valueKey: 'theVal',
   xmlKey: 'theXml'
@@ -786,7 +786,7 @@ could be some reserved word, or the `$` in general cannot be used for a key to s
 
 You can define your own `valueKey` by passing it in the `wsdl_options` to the createClient call:
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   valueKey: 'theVal'
 };
 
@@ -835,7 +835,7 @@ could become
 
 You can define your own `xmlKey` by passing it in the `wsdl_options` object to the createClient call:
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   xmlKey: 'theXml'
 };
 
@@ -874,7 +874,7 @@ However, `attributes` may be a reserved key for some systems that actually want 
 
 You can define your own `attributesKey` by passing it in the `wsdl_options` object to the createClient call:
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   attributesKey: '$attributes'
 };
 
@@ -896,7 +896,7 @@ In rare cases, you may want to precisely control the namespace definition that i
 
 You can specify the namespace definitions by setting the `overrideRootElement` key in the `wsdlOptions` like so:
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   overrideRootElement: {
     namespace: 'xmlns:tns',
     xmlnsAttributes: [{
@@ -922,7 +922,7 @@ To do so, you can pass a `customDeserializer` object in `options`. The propertie
 Example :
 ```javascript
 
-   var wsdlOptions = {
+   const wsdlOptions = {
      customDeserializer: {
 
        // this function will be used to any date found in soap responses
@@ -953,7 +953,7 @@ Example :
 The XML specification specifies that there is no semantic difference between `<Tag></Tag>` and `<Tag />`, and node-soap defaults to using the `<Tag></Tag>` format. But if your web service is particular, or if there is a stylistic preference, the `useEmptyTag` option causes tags with no contents to use the `<Tag />` format instead.
 
 ```javascript
-var wsdlOptions = {
+const wsdlOptions = {
   useEmptyTag: true
 };
 ```
@@ -977,7 +977,7 @@ namespace prefix is used to identify this Element. This is not much of a problem
 
  A simple `ignoredNamespaces` object, which only adds certain namespaces could look like this:
  ```
- var options = {
+ const options = {
    ignoredNamespaces: {
      namespaces: ['namespaceToIgnore', 'someOtherNamespace']
    }
@@ -987,7 +987,7 @@ namespace prefix is used to identify this Element. This is not much of a problem
 
  If you want to override the default ignored namespaces you would simply pass the following `ignoredNamespaces` object within the `options`:
  ```
- var options = {
+ const options = {
      ignoredNamespaces: {
        namespaces: ['namespaceToIgnore', 'someOtherNamespace'],
        override: true
@@ -998,7 +998,7 @@ namespace prefix is used to identify this Element. This is not much of a problem
 
  If you want to override the default ignored namespaces you would simply pass the following `ignoredNamespaces` object within the `options`:
  ```
- var options = {
+ const options = {
      ignoredNamespaces: {
        namespaces: ['namespaceToIgnore', 'someOtherNamespace'],
        override: true
@@ -1017,7 +1017,7 @@ An example to use:
 
 A simple `ignoredNamespaces` object, which only adds certain namespaces could look like this:
 ```
-var options = {
+const options = {
 ignoredNamespaces: true
 }
 ```
@@ -1032,11 +1032,11 @@ your clients.
 
 ```javascript
 // test-initialization-script.js
-var sinon = require('sinon');
-var soapStub = require('soap/soap-stub');
+const sinon = require('sinon');
+const soapStub = require('soap/soap-stub');
 
-var urlMyApplicationWillUseWithCreateClient = 'http://path-to-my-wsdl';
-var clientStub = {
+const urlMyApplicationWillUseWithCreateClient = 'http://path-to-my-wsdl';
+const clientStub = {
   SomeOperation: sinon.stub()
 };
 
@@ -1046,11 +1046,11 @@ clientStub.SomeOperation.respondWithSuccess = soapStub.createRespondingStub({..s
 soapStub.registerClient('my client alias', urlMyApplicationWillUseWithCreateClient, clientStub);
 
 // test.js
-var soapStub = require('soap/soap-stub');
+const soapStub = require('soap/soap-stub');
 
 describe('myService', function() {
-  var clientStub;
-  var myService;
+  const clientStub;
+  const myService;
 
   beforeEach(function() {
     clientStub = soapStub.getStub('my client alias');

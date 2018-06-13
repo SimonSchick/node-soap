@@ -1,13 +1,13 @@
 'use strict';
 
-const soap = require('..'),
-    http = require('http'),
-    assert = require('assert'),
-  req = require('request'),
-  httpClient = require('../lib/http.js'),
-  util = require('util'),
-  { EventEmitter } = require('events'),
-  createSocketStream = require('./_socketStream');
+const soap = require('..');
+const http = require('http');
+const assert = require('assert');
+const req = require('request');
+const httpClient = require('../lib/http.js');
+const util = require('util');
+const { EventEmitter } = require('events');
+const createSocketStream = require('./_socketStream');
 
 it('should allow customization of httpClient, the wsdl file, and associated data download should pass through it', function(done) {
 
@@ -40,12 +40,12 @@ it('should allow customization of httpClient, the wsdl file, and associated data
     }
 
     request(rurl, data, callback, exheaders, exoptions) {
-      var self = this;
-      var options = self.buildRequest(rurl, data, exheaders, exoptions);
+      const self = this;
+      const options = self.buildRequest(rurl, data, exheaders, exoptions);
       //Specify agent to use
       options.agent = this.agent;
-      var headers = options.headers;
-      var req = self._request(options, function(err, res, body) {
+      const headers = options.headers;
+      const req = self._request(options, function(err, res, body) {
         if (err) {
           return callback(err);
         }
@@ -59,18 +59,18 @@ it('should allow customization of httpClient, the wsdl file, and associated data
     };
   }
 
-  var httpCustomClient = new MyHttpClient({},
+  const httpCustomClient = new MyHttpClient({},
     createSocketStream(__dirname + '/wsdl/xsdinclude/xsd_include_http.wsdl', 2708),
     createSocketStream(__dirname + '/wsdl/xsdinclude/types.xsd', 982)
   );
-  var url = 'http://localhost:50000/Dummy.asmx?wsdl';
+  const url = 'http://localhost:50000/Dummy.asmx?wsdl';
   soap.createClient(url,
     {httpClient: httpCustomClient},
     function(err, client) {
       assert.ok(client);
       assert.ifError(err);
       assert.equal(client.httpClient, httpCustomClient);
-      var description = (client.describe());
+      const description = (client.describe());
       assert.deepEqual(client.describe(), {
         DummyService: {
           DummyPortType: {

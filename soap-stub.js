@@ -1,7 +1,7 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-var aliasedClientStubs = {};
-var clientStubs = {};
+const aliasedClientStubs = {};
+const clientStubs = {};
 
 /**
  * This module stubs the soap module to allow for offline
@@ -49,7 +49,7 @@ function createClient(wsdlUrl, options, cb) {
     return setTimeout(cb.bind(null, new Error('forced error on createClient')));
   }
 
-  var client = getStub(wsdlUrl);
+  const client = getStub(wsdlUrl);
 
   if (client) {
     resetStubbedMethods(client);

@@ -1,13 +1,13 @@
 "use strict";
 
-var fs = require('fs'),
-    soap = require('..'),
-    assert = require('assert'),
-    request = require('request'),
-    http = require('http'),
-    lastReqAddress;
+const fs = require('fs');
+const soap = require('..');
+const assert = require('assert');
+const request = require('request');
+const http = require('http');
+let lastReqAddress;
 
-var test = {};
+const test = {};
 test.server = null;
 test.service = {
   StockQuoteService: {
@@ -47,7 +47,7 @@ test.service = {
       IsValidPrice: function(args, cb, soapHeader, req) {
         lastReqAddress = req.connection.remoteAddress;
 
-        var validationError = {
+        const validationError = {
           Fault: {
             Code: {
               Value: "soap:Sender",
@@ -58,14 +58,14 @@ test.service = {
           }
         };
 
-        var isValidPrice = function() {
-          var price = args.price;
+        const isValidPrice = function() {
+          let price = args.price;
           if(isNaN(price) || (price === ' ')) {
             return cb(validationError);
           }
 
           price = parseInt(price, 10);
-          var validPrice = (price > 0 && price < Math.pow(10, 5));
+          const validPrice = (price > 0 && price < Math.pow(10, 5));
           return cb(null, { valid: validPrice });
         };
 
@@ -119,8 +119,8 @@ describe('SOAP Server', function() {
   it('should add and clear response soap headers', function(done) {
     assert.ok(!test.soapServer.getSoapHeaders());
 
-    var i1 = test.soapServer.addSoapHeader('about-to-change-1');
-    var i2 = test.soapServer.addSoapHeader('about-to-change-2');
+    const i1 = test.soapServer.addSoapHeader('about-to-change-1');
+    const i2 = test.soapServer.addSoapHeader('about-to-change-2');
 
     assert.ok(i1 === 0);
     assert.ok(i2 === 1);
@@ -138,7 +138,7 @@ describe('SOAP Server', function() {
 
   it('should return predefined headers in response', function(done) {
     soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
-      var clientArgs = { tickerSymbol: 'AAPL'};
+      const clientArgs = { tickerSymbol: 'AAPL'};
 
       assert.ifError(err);
       test.soapServer.addSoapHeader('<header1>ONE</header1>');
@@ -247,8 +247,8 @@ describe('SOAP Server', function() {
   it('should return complete client description', function(done) {
     soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
       assert.ifError(err);
-      var description = client.describe(),
-          expected = { input: { tickerSymbol: "string" }, output:{ price: "float" } };
+      const description = client.describe();
+      const expected = { input: { tickerSymbol: "string" }, output:{ price: "float" } };
       assert.deepEqual(expected , description.StockQuoteService.StockQuotePort.GetLastTradePrice);
       done();
     });
@@ -293,7 +293,7 @@ describe('SOAP Server', function() {
       assert.ifError(err);
       client.IsValidPrice({ price: 50000 }, function(err, result) {
         // node V3.x+ reports addresses as IPV6
-        var addressParts = lastReqAddress.split(':');
+        const addressParts = lastReqAddress.split(':');
         assert.equal(addressParts[(addressParts.length - 1)], '127.0.0.1');
         done();
       });
@@ -393,7 +393,7 @@ describe('SOAP Server', function() {
       assert.ifError(err);
       client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.2' }, function(err, response, body) {
         assert.ok(err);
-        var fault = err.root.Envelope.Body.Fault;
+        const fault = err.root.Envelope.Body.Fault;
         assert.equal(err.message, fault.faultcode + ': ' + fault.faultstring);
         assert.equal(fault.Code.Value, "soap:Sender");
         assert.equal(fault.Reason.Text, "Processing Error");
@@ -413,7 +413,7 @@ describe('SOAP Server', function() {
       assert.ifError(err);
       client.GetLastTradePrice({ tickerSymbol: 'SOAP Fault v1.1' }, function(err, response, body) {
         assert.ok(err);
-        var fault = err.root.Envelope.Body.Fault;
+        const fault = err.root.Envelope.Body.Fault;
         assert.equal(err.message, fault.faultcode + ': ' + fault.faultstring);
         assert.equal(fault.faultcode, "soap:Client.BadArguments");
         assert.equal(fault.faultstring, "Error while processing arguments");
@@ -463,7 +463,7 @@ describe('SOAP Server', function() {
   it('should accept attributes as an object on the body element', function(done) {
     soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
       assert.ifError(err);
-      var attributes = { 'xmlns:wsu': 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd', 'wsu:Id': '######################' };
+      const attributes = { 'xmlns:wsu': 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd', 'wsu:Id': '######################' };
       client.addBodyAttribute(attributes);
       client.GetLastTradePrice({ tickerSymbol: 'AAPL' }, function(err, response, body) {
         assert.ifError(err);

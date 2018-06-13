@@ -1,12 +1,12 @@
 'use strict';
 
-var fs = require('fs'),
-  soap = require('..'),
-  http = require('http'),
-  assert = require('assert'),
-  _ = require('lodash'),
-  sinon = require('sinon'),
-  wsdl = require('../lib/wsdl');
+const fs = require('fs');
+const soap = require('..');
+const http = require('http');
+const assert = require('assert');
+const _ = require('lodash');
+const sinon = require('sinon');
+const wsdl = require('../lib/wsdl');
 
 [
   { suffix: '', options: {} },
@@ -25,8 +25,8 @@ var fs = require('fs'),
         assert.ok(client);
         assert.ok(!client.getSoapHeaders());
 
-        var i1 = client.addSoapHeader('about-to-change-1');
-        var i2 = client.addSoapHeader('about-to-change-2');
+        const i1 = client.addSoapHeader('about-to-change-1');
+        const i2 = client.addSoapHeader('about-to-change-2');
 
         assert.ok(i1 === 0);
         assert.ok(i2 === 1);
@@ -44,7 +44,7 @@ var fs = require('fs'),
     });
 
     it('should issue async callback for cached wsdl', function (done) {
-      var called = false;
+      let called = false;
       soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
         assert.ok(client);
         assert.ifError(err);
@@ -55,7 +55,7 @@ var fs = require('fs'),
     });
 
     it('should allow customization of httpClient', function (done) {
-      var myHttpClient = {
+      const myHttpClient = {
         request: function () { }
       };
       soap.createClient(__dirname + '/wsdl/default_namespace.wsdl',
@@ -69,7 +69,7 @@ var fs = require('fs'),
     });
 
     it('should allow customization of request for http client', function (done) {
-      var myRequest = function () {
+      const myRequest = function () {
       };
       soap.createClient(__dirname + '/wsdl/default_namespace.wsdl',
       Object.assign({ request: myRequest }, meta.options),
@@ -100,7 +100,7 @@ var fs = require('fs'),
         assert.ok(client);
         assert.ifError(err);
         
-        var xmlStr = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n\t<head>\n\t\t<title>404 - Not Found</title>\n\t</head>\n\t<body>\n\t\t<h1>404 - Not Found</h1>\n\t\t<script type="text/javascript" src="http://gp1.wpc.edgecastcdn.net/00222B/beluga/pilot_rtm/beluga_beacon.js"></script>\n\t</body>\n</html>';
+        const xmlStr = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n\t<head>\n\t\t<title>404 - Not Found</title>\n\t</head>\n\t<body>\n\t\t<h1>404 - Not Found</h1>\n\t\t<script type="text/javascript" src="http://gp1.wpc.edgecastcdn.net/00222B/beluga/pilot_rtm/beluga_beacon.js"></script>\n\t</body>\n</html>';
         client.MyOperation({_xml: xmlStr}, function (err, result, raw, soapHeader) {
             assert.ok(err);
             assert.notEqual(raw.indexOf('html'), -1);
@@ -121,8 +121,8 @@ var fs = require('fs'),
 
 
     it('should allow disabling the wsdl cache', function (done) {
-      var spy = sinon.spy(wsdl, 'open_wsdl');
-      var options = Object.assign({ disableCache: true }, meta.options);
+      const spy = sinon.spy(wsdl, 'open_wsdl');
+      const options = Object.assign({ disableCache: true }, meta.options);
       soap.createClient(__dirname + '/wsdl/binding_document.wsdl', options, function (err1, client1) {
         assert.ok(client1);
         assert.ok(!err1);
@@ -138,14 +138,14 @@ var fs = require('fs'),
 
 
     describe('Headers in request and last response', function () {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       before(function (done) {
         server = http.createServer(function (req, res) {
-          var status_value = (req.headers['test-header'] === 'test') ? 'pass' : 'fail';
+          const status_value = (req.headers['test-header'] === 'test') ? 'pass' : 'fail';
 
           res.setHeader('status', status_value);
           res.statusCode = 200;
@@ -424,7 +424,7 @@ var fs = require('fs'),
       soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
         assert.ok(client);
         assert.ok(!client.getSoapHeaders());
-        var soapheader = {
+        const soapheader = {
           'esnext': false,
           'moz': true,
           'boss': true,
@@ -476,10 +476,10 @@ var fs = require('fs'),
     });
 
     describe('Namespace number', function () {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       before(function (done) {
         server = http.createServer(function (req, res) {
@@ -499,7 +499,7 @@ var fs = require('fs'),
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
           assert.ok(client);
 
-          var data = {
+          const data = {
             attributes: {
               xsi_type: {
                 type: 'Ty',
@@ -508,7 +508,7 @@ var fs = require('fs'),
             }
           };
 
-          var message = '<Request xsi:type="ns1:Ty" xmlns:ns1="xmlnsTy" xmlns="http://www.example.com/v1"></Request>';
+          const message = '<Request xsi:type="ns1:Ty" xmlns:ns1="xmlnsTy" xmlns="http://www.example.com/v1"></Request>';
           client.MyOperation(data, function (err, result) {
             assert.ok(client.lastRequest);
             assert.ok(client.lastMessage);
@@ -530,12 +530,12 @@ var fs = require('fs'),
     });
 
     describe('Follow even non-standard redirects', function () {
-      var server1 = null;
-      var server2 = null;
-      var server3 = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server1 = null;
+      let server2 = null;
+      let server3 = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       before(function (done) {
         server1 = http.createServer(function (req, res) {
@@ -580,10 +580,10 @@ var fs = require('fs'),
     });
 
     describe('Handle non-success http status codes', function () {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       before(function (done) {
         server = http.createServer(function (req, res) {
@@ -623,10 +623,10 @@ var fs = require('fs'),
     });
 
     describe('Handle HTML answer from non-SOAP server', function () {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       before(function (done) {
         server = http.createServer(function (req, res) {
@@ -655,10 +655,10 @@ var fs = require('fs'),
     });
 
     describe('Client Events', function () {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ":" + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ":" + port;
 
       before(function (done) {
         server = http.createServer(function (req, res) {
@@ -676,7 +676,7 @@ var fs = require('fs'),
 
       it('Should emit the "message" event with Soap Body string and an exchange id', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitEvent = false;
+          let didEmitEvent = false;
           client.on('message', function (xml, eid) {
             didEmitEvent = true;
             // Should contain only message body
@@ -694,7 +694,7 @@ var fs = require('fs'),
 
       it('Should emit the "request" event with entire XML message and an exchange id', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitEvent = false;
+          let didEmitEvent = false;
           client.on('request', function (xml, eid) {
             didEmitEvent = true;
             // Should contain entire soap message
@@ -712,7 +712,7 @@ var fs = require('fs'),
 
       it('Should emit the "response" event with Soap Body string and Response object and an exchange id', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitEvent = false;
+          let didEmitEvent = false;
           client.on('response', function (xml, response, eid) {
             didEmitEvent = true;
             // Should contain entire soap message
@@ -731,9 +731,10 @@ var fs = require('fs'),
 
       it('Should emit the "request" and "response" events with the same generated exchange id if none is given', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitRequestEvent = false;
-          var didEmitResponseEvent = false;
-          var requestEid, responseEid;
+          let didEmitRequestEvent = false;
+          let didEmitResponseEvent = false;
+          let requestEid;
+          let responseEid;
 
           client.on('request', function (xml, eid) {
             didEmitRequestEvent = true;
@@ -758,9 +759,10 @@ var fs = require('fs'),
 
       it('Should emit the "request" and "response" events with the given exchange id', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitRequestEvent = false;
-          var didEmitResponseEvent = false;
-          var requestEid, responseEid;
+          let didEmitRequestEvent = false;
+          let didEmitResponseEvent = false;
+          let requestEid;
+          let responseEid;
 
           client.on('request', function (xml, eid) {
             didEmitRequestEvent = true;
@@ -786,7 +788,7 @@ var fs = require('fs'),
 
       it('should emit a \'soapError\' event with an exchange id', function (done) {
         soap.createClient(__dirname + '/wsdl/default_namespace.wsdl', meta.options, function (err, client) {
-          var didEmitEvent = false;
+          let didEmitEvent = false;
           client.on('soapError', function (err, eid) {
             didEmitEvent = true;
             assert.ok(err.root.Envelope.Body.Fault);
@@ -802,10 +804,10 @@ var fs = require('fs'),
     });
 
     it('should return error in the call when Fault was returned', function (done) {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       server = http.createServer(function (req, res) {
         res.statusCode = 200;
@@ -831,10 +833,10 @@ var fs = require('fs'),
     });
 
     it('should return error in the call when Body was returned empty', function (done) {
-      var server = null;
-      var hostname = '127.0.0.1';
-      var port = 15099;
-      var baseUrl = 'http://' + hostname + ':' + port;
+      let server = null;
+      const hostname = '127.0.0.1';
+      const port = 15099;
+      const baseUrl = 'http://' + hostname + ':' + port;
 
       server = http.createServer(function (req, res) {
         res.statusCode = 200;
@@ -863,18 +865,18 @@ var fs = require('fs'),
       it('shall generate correct payload for methods with string parameter', function (done) {
         // Mock the http post function in order to easy be able to validate the
         // generated payload
-        var stringParameterValue = 'MY_STRING_PARAMETER_VALUE';
-        var expectedSoapBody = '<sstringElement xmlns="http://www.BuiltinTypes.com/">' +
+        const stringParameterValue = 'MY_STRING_PARAMETER_VALUE';
+        const expectedSoapBody = '<sstringElement xmlns="http://www.BuiltinTypes.com/">' +
           stringParameterValue +
           '</sstringElement>';
-        var request = null;
-        var mockRequestHandler = function (_request) {
+        let request = null;
+        const mockRequestHandler = function (_request) {
           request = _request;
           return {
             on: function () { }
           };
         };
-        var options = Object.assign({
+        const options = Object.assign({
           request: mockRequestHandler,
         }, meta.options);
         soap.createClient(__dirname + '/wsdl/builtin_types.wsdl', options, function (err, client) {
@@ -884,8 +886,8 @@ var fs = require('fs'),
           client.StringOperation(stringParameterValue);
 
           // Analyse and validate the generated soap body
-          var requestBody = request.body;
-          var soapBody = requestBody.match(/<soap:Body>(.*)<\/soap:Body>/)[1];
+          const requestBody = request.body;
+          const soapBody = requestBody.match(/<soap:Body>(.*)<\/soap:Body>/)[1];
           assert.ok(soapBody === expectedSoapBody);
           done();
         });
@@ -894,11 +896,11 @@ var fs = require('fs'),
       it('shall generate correct payload for methods with array parameter', function (done) {
         soap.createClient(__dirname + '/wsdl/list_parameter.wsdl', function(err, client) {
           assert.ok(client);
-          var pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          var arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
+          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({input: {PeriodList: {PeriodType: [{PeriodId: '1'}]}}}, function() {
-            var sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
+            const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
             assert.equal(sentInputContent, '<PeriodList><PeriodType><PeriodId>1</PeriodId></PeriodType></PeriodList>');
             done();
           });
@@ -909,11 +911,11 @@ var fs = require('fs'),
         // used for servers that cannot aggregate individually namespaced array elements
         soap.createClient(__dirname + '/wsdl/list_parameter.wsdl', {disableCache: true, namespaceArrayElements: false}, function(err, client) {
           assert.ok(client);
-          var pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          var arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
+          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({input: {PeriodList: {PeriodType: [{PeriodId: '1'}, {PeriodId: '2'}]}}}, function() {
-            var sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
+            const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
             assert.equal(sentInputContent, '<PeriodList><PeriodType><PeriodId>1</PeriodId><PeriodId>2</PeriodId></PeriodType></PeriodList>');
             done();
           });
@@ -925,11 +927,11 @@ var fs = require('fs'),
         soap.createClient(__dirname + '/wsdl/list_parameter.wsdl', {disableCache: true, namespaceArrayElements: true}, function(err, client) {
           assert.ok(client);
           assert.ok(client.wsdl.options.namespaceArrayElements === true);
-          var pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          var arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
+          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({input: {PeriodList: {PeriodType: [{PeriodId: '1'}, {PeriodId: '2'}]}}}, function() {
-            var sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
+            const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
             assert.equal(sentInputContent, '<PeriodList><PeriodType><PeriodId>1</PeriodId></PeriodType><PeriodType><PeriodId>2</PeriodId></PeriodType></PeriodList>');
             done();
           });
@@ -978,7 +980,7 @@ var fs = require('fs'),
               ]
             }
           }, function () {
-            var sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<Requests>') + '<Requests>'.length, client.lastRequest.indexOf('</Requests>'));
+            const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<Requests>') + '<Requests>'.length, client.lastRequest.indexOf('</Requests>'));
             assert.equal(
               sentInputContent,
               '<AddAttributeRequest><RequestIdx>1</RequestIdx><Identifier><SystemNamespace>bugrepro</SystemNamespace><ResellerId>1</ResellerId><CustomerNum>860692</CustomerNum><AccountUid>80a6e559-4d65-11e7-bd5b-0050569a12d7</AccountUid></Identifier><Attr><AttributeId>716</AttributeId><IsTemplateAttribute>0</IsTemplateAttribute><ReadOnly>0</ReadOnly><CanBeModified>1</CanBeModified><Name>domain</Name><AccountElements><AccountElement><ElementId>1693</ElementId><Name>domain</Name><Value>foo</Value><ReadOnly>0</ReadOnly><CanBeModified>1</CanBeModified></AccountElement></AccountElements></Attr><RequestedBy>blah</RequestedBy><RequestedByLogin>system</RequestedByLogin></AddAttributeRequest>');
@@ -1003,8 +1005,8 @@ var fs = require('fs'),
           assert.ok(client);
           assert.ok(!client.getSoapHeaders());
 
-          var i1 = client.addSoapHeader('about-to-change-1');
-          var i2 = client.addSoapHeader('about-to-change-2');
+          const i1 = client.addSoapHeader('about-to-change-1');
+          const i2 = client.addSoapHeader('about-to-change-2');
 
           assert.ok(i1 === 0);
           assert.ok(i2 === 1);
@@ -1022,7 +1024,7 @@ var fs = require('fs'),
       });
 
       it('should issue async promise for cached wsdl', function (done) {
-        var called = false;
+        let called = false;
         soap.createClientAsync(__dirname + '/wsdl/default_namespace.wsdl', meta.options).then(function (client) {
           assert.ok(client);
           called = true;
@@ -1032,7 +1034,7 @@ var fs = require('fs'),
       });
 
       it('should allow customization of httpClient', function (done) {
-        var myHttpClient = {
+        const myHttpClient = {
           request: function () { }
         };
         soap.createClientAsync(__dirname + '/wsdl/default_namespace.wsdl',
@@ -1045,7 +1047,7 @@ var fs = require('fs'),
       });
       
       it('should allow customization of request for http client', function (done) {
-        var myRequest = function () {
+        const myRequest = function () {
         };
         soap.createClientAsync(__dirname + '/wsdl/default_namespace.wsdl',
         Object.assign({ request: myRequest }, meta.options))
@@ -1069,7 +1071,7 @@ var fs = require('fs'),
         soap.createClientAsync(__dirname + '/wsdl/default_namespace.wsdl', Object.assign({envelopeKey: 'soapenv'}, meta.options))
           .then(function (client) {
             assert.ok(client);
-            var xmlStr = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n\t<head>\n\t\t<title>404 - Not Found</title>\n\t</head>\n\t<body>\n\t\t<h1>404 - Not Found</h1>\n\t\t<script type="text/javascript" src="http://gp1.wpc.edgecastcdn.net/00222B/beluga/pilot_rtm/beluga_beacon.js"></script>\n\t</body>\n</html>';
+            const xmlStr = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n\t<head>\n\t\t<title>404 - Not Found</title>\n\t</head>\n\t<body>\n\t\t<h1>404 - Not Found</h1>\n\t\t<script type="text/javascript" src="http://gp1.wpc.edgecastcdn.net/00222B/beluga/pilot_rtm/beluga_beacon.js"></script>\n\t</body>\n</html>';
             return client.MyOperationAsync({_xml: xmlStr});
           })
           .spread(function (result, raw, soapHeader) {})
@@ -1079,7 +1081,7 @@ var fs = require('fs'),
       });
 
       it('should allow customization of envelope', function (done) {
-        var client;
+        let client;
         soap.createClientAsync(__dirname + '/wsdl/default_namespace.wsdl', Object.assign({ envelopeKey: 'soapenv' }, meta.options))
         .then(function (createdClient) {
           assert.ok(createdClient);
@@ -1098,7 +1100,7 @@ var fs = require('fs'),
         .then(function (client) {
           assert.ok(client);
           assert.ok(!client.getSoapHeaders());
-          var soapheader = {
+          const soapheader = {
             'esnext': false,
             'moz': true,
             'boss': true,
@@ -1118,8 +1120,8 @@ var fs = require('fs'),
       });
 
       it('should allow disabling the wsdl cache', function (done) {
-        var spy = sinon.spy(wsdl, 'open_wsdl');
-        var options = Object.assign({ disableCache: true }, meta.options);
+        const spy = sinon.spy(wsdl, 'open_wsdl');
+        const options = Object.assign({ disableCache: true }, meta.options);
         soap.createClientAsync(__dirname + '/wsdl/binding_document.wsdl', options)
         .then(function (client) {
           assert.ok(client);

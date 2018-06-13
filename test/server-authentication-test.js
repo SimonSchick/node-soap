@@ -1,13 +1,13 @@
 "use strict";
 
-var fs = require('fs'),
-    soap = require('..'),
-    assert = require('assert'),
-    request = require('request'),
-    http = require('http'),
-    lastReqAddress;
+const fs = require('fs');
+const soap = require('..');
+const assert = require('assert');
+const request = require('request');
+const http = require('http');
+let lastReqAddress;
 
-var test = {};
+const test = {};
 test.server = null;
 test.authenticate = null;
 test.authenticateProxy = function authenticate(security, callback) {
