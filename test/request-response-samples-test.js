@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const fs   = require('fs');
-const glob   = require('glob');
+const fs = require('fs');
+const glob = require('glob');
 const http = require('http');
 const path = require('path');
 const timekeeper = require('timekeeper');
@@ -12,32 +12,34 @@ const soap = require('../');
 const WSSecurity = require('../lib/security/WSSecurity');
 let server;
 let port;
-const tests = glob.sync('./request-response-samples/*', { cwd:__dirname })
-  .map(node => {return path.resolve(__dirname, node);})
-  .filter(node => {return fs.statSync(node).isDirectory();});
+const tests = glob.sync('./request-response-samples/*', { cwd: __dirname })
+  .map(node => path.resolve(__dirname, node))
+  .filter(node => fs.statSync(node).isDirectory());
 const suite = {};
 
-function normalizeWhiteSpace(raw)
-{
-  let normalized = raw.replace(/\r\n|\r|\n/g, '');  // strip line endings
+function normalizeWhiteSpace(raw) {
+  let normalized = raw.replace(/\r\n|\r|\n/g, ''); // strip line endings
   normalized = normalized.replace(/\s\s+/g, ' '); // convert whitespace to spaces
-  normalized = normalized.replace(/> </g, '><');  // get rid of spaces between elements
+  normalized = normalized.replace(/> </g, '><'); // get rid of spaces between elements
   return normalized;
 }
 
 const requestContext = {
   // set these two within each test
-  expectedRequest:null,
-  responseToSend:null,
-  doneHandler:null,
-  requestHandler(req, res){
+  expectedRequest: null,
+  responseToSend: null,
+  doneHandler: null,
+  requestHandler(req, res) {
     const chunks = [];
     req.on('data', chunk => {
-      // ignore eol on sample files.
+      // Ignore eol on sample files.
       chunks.push(chunk.toString().replace(/\r?\n$/m, ''));
     });
     req.on('end', () => {
-      if(!requestContext.expectedRequest){return res.end(requestContext.responseToSend);}
+      if (!requestContext.expectedRequest) {
+        res.end(requestContext.responseToSend);
+        return;
+      }
 
       const actualRequest = normalizeWhiteSpace(chunks.join(''));
       const expectedRequest = normalizeWhiteSpace(requestContext.expectedRequest);
@@ -47,16 +49,24 @@ const requestContext = {
         let comparison = '';
         diff.forEach(part => {
           let color = 'grey';
-          if (part.added) { color = 'green'; }
-          if (part.removed) { color = 'red'; }
+          if (part.added) {
+            color = 'green';
+          }
+          if (part.removed) {
+            color = 'red';
+          }
           comparison += part.value[color];
         });
-        // console.log(comparison);
+        // eslint-disable-next-line
+        console.log(comparison);
       }
 
       assert.equal(actualRequest, expectedRequest);
 
-      if(!requestContext.responseToSend){return requestContext.doneHandler();}
+      if (!requestContext.responseToSend) {
+        requestContext.doneHandler();
+        return;
+      }
       res.end(requestContext.responseToSend);
 
       requestContext.expectedRequest = null;
@@ -84,53 +94,100 @@ tests.forEach(test => {
   let wsdlOptions = {};
 
   // headerJSON is optional
-  if(fs.existsSync(headerJSON)){headerJSON = require(headerJSON);}
-  else {headerJSON = {};}
+  if (fs.existsSync(headerJSON)) {
+    headerJSON = require(headerJSON);
+  } else {
+    headerJSON = {};
+  }
 
   // securityJSON is optional
-  if(fs.existsSync(securityJSON)){securityJSON = require(securityJSON);}
-  else {securityJSON = {};}
+  if (fs.existsSync(securityJSON)) {
+    securityJSON = require(securityJSON);
+  } else {
+    securityJSON = {};
+  }
 
   // responseJSON is optional
-  if (fs.existsSync(responseJSON)){responseJSON = require(responseJSON);}
-  else if(fs.existsSync(responseJSONError)){responseJSON = require(responseJSONError);}
-  else {responseJSON = null;}
+  if (fs.existsSync(responseJSON)) {
+    responseJSON = require(responseJSON);
+  } else if (fs.existsSync(responseJSONError)) {
+    responseJSON = require(responseJSONError);
+  } else {
+    responseJSON = null;
+  }
 
   // responseSoapHeaderJSON is optional
-  if (fs.existsSync(responseSoapHeaderJSON)){responseSoapHeaderJSON = require(responseSoapHeaderJSON);}
-  else {responseSoapHeaderJSON = null;}
+  if (fs.existsSync(responseSoapHeaderJSON)) {
+    responseSoapHeaderJSON = require(responseSoapHeaderJSON);
+  } else {
+    responseSoapHeaderJSON = null;
+  }
 
   // requestXML is optional
-  if(fs.existsSync(requestXML)){requestXML = `${fs.readFileSync(requestXML)}`;}
-  else {requestXML = null;}
+  if (fs.existsSync(requestXML)) {
+    requestXML = `${fs.readFileSync(requestXML)}`; } else {
+    requestXML = null;
+  }
 
   // responseXML is optional
-  if(fs.existsSync(responseXML)){responseXML = `${fs.readFileSync(responseXML)}`;}
-  else {responseXML = null;}
+  if (fs.existsSync(responseXML)) {
+    responseXML = `${fs.readFileSync(responseXML)}`;
+  } else {
+    responseXML = null;
+  }
 
   // requestJSON is required as node-soap will expect a request object anyway
   requestJSON = require(requestJSON);
 
   // options is optional
-  if (fs.existsSync(options)){options = require(options);}
-  else {options = {};}
+  if (fs.existsSync(options)) {
+    options = require(options);
+  } else {
+    options = {};
+  }
 
   // wsdlOptions is optional
-  if(fs.existsSync(wsdlOptionsFile)) {wsdlOptions = require(wsdlOptionsFile);}
-  else if(fs.existsSync(wsdlJSOptionsFile)) {wsdlOptions = require(wsdlJSOptionsFile);}
-  else {wsdlOptions = {};}
+  if (fs.existsSync(wsdlOptionsFile)) {
+    wsdlOptions = require(wsdlOptionsFile);
+  } else if (fs.existsSync(wsdlJSOptionsFile)) {
+    wsdlOptions = require(wsdlJSOptionsFile); } else {
+    wsdlOptions = {};
+  }
 
   generateTest(name, methodName, wsdl, headerJSON, securityJSON, requestXML, requestJSON, responseXML, responseJSON, responseSoapHeaderJSON, wsdlOptions, options, true);
 });
 
-function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requestXML, requestJSON, responseXML, responseJSON, responseSoapHeaderJSON, wsdlOptions, options){
+function promiseCaller(client, methodName, requestJSON, responseJSON, responseSoapHeaderJSON) {
+  return client[methodName](requestJSON).then(responseArr => {
+    const [json, soapHeader] = responseArr;
+
+    if (requestJSON) {
+      assert.equal(JSON.stringify(typeof json === 'undefined' ? null : json), JSON.stringify(responseJSON));
+      if (responseSoapHeaderJSON) {
+        assert.equal(JSON.stringify(soapHeader), JSON.stringify(responseSoapHeaderJSON));
+      }
+    }
+  })
+    .catch(err => {
+      if (requestJSON) {
+        assert.notEqual('undefined: undefined', err.message);
+        assert.deepEqual(err.root, responseJSON);
+      }
+    });
+}
+
+function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requestXML, requestJSON, responseXML, responseJSON, responseSoapHeaderJSON, wsdlOptions, options) {
   name += ' (promisified)';
   methodName += 'Async';
   const methodCaller = promiseCaller;
 
-  suite[name] = function(){
-    if(requestXML) {requestContext.expectedRequest = requestXML;}
-    if(responseXML) {requestContext.responseToSend = responseXML;}
+  suite[name] = () => {
+    if (requestXML) {
+      requestContext.expectedRequest = requestXML;
+    }
+    if (responseXML) {
+      requestContext.responseToSend = responseXML;
+    }
     return Promise.race([
       soap.createClientAsync(wsdlPath, wsdlOptions, `http://localhost:${port}/Message/Message.dll?Handler=Default`)
         .then(client => {
@@ -143,8 +200,8 @@ function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requ
             client.setSecurity(new WSSecurity(securityJSON.username, securityJSON.password, securityJSON.options));
           }
 
-          // throw more meaningful error
-          if(typeof client[methodName] !== 'function'){
+          // Throw more meaningful error
+          if (typeof client[methodName] !== 'function') {
             throw new Error(`method ${methodName} does not exists in wsdl specified in test wsdl: ${wsdlPath}`);
           }
 
@@ -153,32 +210,14 @@ function generateTest(name, methodName, wsdlPath, headerJSON, securityJSON, requ
       new Promise((resolve, reject) => {
         requestContext.doneHandler = (err, data) => {
           if (err) {
-            return reject(err);
+            reject(err);
+            return;
           }
           resolve(data);
         };
-      }),
+      })
     ]);
   };
-}
-
-function promiseCaller(client, methodName, requestJSON, responseJSON, responseSoapHeaderJSON, options){
-  return client[methodName](requestJSON).then(responseArr => {
-    const [json, body, soapHeader] = responseArr;
-
-    if(requestJSON){
-      // assert.deepEqual(json, responseJSON);
-      assert.equal(JSON.stringify(typeof json === 'undefined' ? null : json), JSON.stringify(responseJSON));
-      if(responseSoapHeaderJSON){
-        assert.equal(JSON.stringify(soapHeader), JSON.stringify(responseSoapHeaderJSON));
-      }
-    }
-  }).catch(err => {
-    if(requestJSON){
-      assert.notEqual('undefined: undefined', err.message);
-      assert.deepEqual(err.root, responseJSON);
-    }
-  });
 }
 
 describe('Request Response Sampling', () => {
@@ -186,10 +225,13 @@ describe('Request Response Sampling', () => {
 
   before(done => {
     timekeeper.freeze(Date.parse('2014-10-12T01:02:03Z'));
-    Math.random = function() { return 1; };
+    Math.random = () => 1;
     server = http.createServer(requestContext.requestHandler);
-    server.listen(0, e => {
-      if(e){return done(e);}
+    server.listen(0, err => {
+      if (err) {
+        done(err);
+        return;
+      }
       ({ port } = server.address());
       done();
     });
@@ -207,7 +249,7 @@ describe('Request Response Sampling', () => {
     server.close();
   });
 
-  Object.keys(suite).map(key => {
+  Object.keys(suite).forEach(key => {
     it(key, suite[key]);
   });
 });

@@ -4,9 +4,11 @@ const fs = require('fs');
 const soap = require('..');
 const http = require('http');
 const assert = require('assert');
-const _ = require('lodash');
+const { get } = require('lodash');
 const sinon = require('sinon');
 const wsdl = require('../lib/wsdl');
+
+/* eslint-disable new-cap */
 
 [
   { suffix: '', options: {} },
@@ -22,6 +24,7 @@ const wsdl = require('../lib/wsdl');
 
     it('should add and clear soap headers', done => {
       soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+        assert.ifError(err);
         assert.ok(client);
         assert.ok(!client.getSoapHeaders());
 
@@ -58,27 +61,32 @@ const wsdl = require('../lib/wsdl');
       const myHttpClient = {
         request() { }
       };
-      soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`,
+      soap.createClient(
+        `${__dirname}/wsdl/default_namespace.wsdl`,
         Object.assign({ httpClient: myHttpClient }, meta.options),
         (err, client) => {
           assert.ok(client);
           assert.ifError(err);
           assert.equal(client.httpClient, myHttpClient);
           done();
-        });
+        }
+      );
     });
 
     it('should allow customization of request for http client', done => {
       const myRequest = function() {
+        // noop
       };
-      soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`,
+      soap.createClient(
+        `${__dirname}/wsdl/default_namespace.wsdl`,
         Object.assign({ request: myRequest }, meta.options),
         (err, client) => {
           assert.ok(client);
           assert.ifError(err);
           assert.equal(client.httpClient._request, myRequest);
           done();
-        });
+        }
+      );
     });
 
 
@@ -121,7 +129,7 @@ const wsdl = require('../lib/wsdl');
 
 
     it('should allow disabling the wsdl cache', done => {
-      const spy = sinon.spy(wsdl, 'open_wsdl');
+      const spy = sinon.spy(wsdl, 'openWsdl');
       const options = Object.assign({ disableCache: true }, meta.options);
       soap.createClient(`${__dirname}/wsdl/binding_document.wsdl`, options, (err1, client1) => {
         assert.ok(client1);
@@ -130,7 +138,7 @@ const wsdl = require('../lib/wsdl');
           assert.ok(client2);
           assert.ok(!err2);
           assert.ok(spy.calledTwice);
-          wsdl.open_wsdl.restore();
+          wsdl.openWsdl.restore();
           done();
         });
       });
@@ -145,9 +153,9 @@ const wsdl = require('../lib/wsdl');
 
       before(done => {
         server = http.createServer((req, res) => {
-          const status_value = (req.headers['test-header'] === 'test') ? 'pass' : 'fail';
+          const statusValue = (req.headers['test-header'] === 'test') ? 'pass' : 'fail';
 
-          res.setHeader('status', status_value);
+          res.setHeader('status', statusValue);
           res.statusCode = 200;
           res.write(JSON.stringify({ tempResponse: 'temp' }), 'utf8');
           res.end();
@@ -166,8 +174,8 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.notEqual(client.lastRequestHeaders.Host.indexOf(`:${port}`), -1);
-
             done();
           }, null, { 'test-header': 'test' });
         }, baseUrl);
@@ -217,6 +225,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastResponse);
             assert.ok(client.lastResponseHeaders);
@@ -237,6 +246,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastResponseHeaders);
             assert.equal(client.lastResponseHeaders.status, 'pass');
@@ -252,6 +262,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastResponseHeaders);
             assert.equal(client.lastResponseHeaders.status, 'fail');
@@ -267,6 +278,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastResponse);
             assert.ok(client.lastResponseHeaders);
@@ -282,6 +294,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result, rawResponse, headers, rawRequest) => {
+            assert.ifError(err);
             assert.ok(rawRequest);
             assert.ok(typeof rawRequest === 'string');
 
@@ -296,6 +309,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastResponse);
             assert.ok(client.lastResponseHeaders);
@@ -312,6 +326,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastRequestHeaders['test-header']);
             assert.ok(client.lastRequestHeaders['options-test-header']);
@@ -341,6 +356,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
 
           client.MyOperation({}, (err, result) => {
+            assert.ifError(err);
             assert.ok(result);
             assert.ok(client.lastRequestHeaders);
             assert.ok(client.lastRequest);
@@ -422,6 +438,7 @@ const wsdl = require('../lib/wsdl');
 
     it('should add soap headers', done => {
       soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+        assert.ifError(err);
         assert.ok(client);
         assert.ok(!client.getSoapHeaders());
         const soapheader = {
@@ -445,6 +462,7 @@ const wsdl = require('../lib/wsdl');
 
     it('should add soap headers with a namespace', done => {
       soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+        assert.ifError(err);
         assert.ok(client);
         assert.ok(!client.getSoapHeaders());
 
@@ -461,6 +479,7 @@ const wsdl = require('../lib/wsdl');
 
     it('should add http headers', done => {
       soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+        assert.ifError(err);
         assert.ok(client);
         assert.ok(!client.getHttpHeaders());
 
@@ -497,6 +516,7 @@ const wsdl = require('../lib/wsdl');
 
       it('should reset the namespace number', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           assert.ok(client);
 
           const data = {
@@ -510,6 +530,7 @@ const wsdl = require('../lib/wsdl');
 
           const message = '<Request xsi:type="ns1:Ty" xmlns:ns1="xmlnsTy" xmlns="http://www.example.com/v1"></Request>';
           client.MyOperation(data, (err, result) => {
+            assert.ifError(err);
             assert.ok(client.lastRequest);
             assert.ok(client.lastMessage);
             assert.ok(client.lastEndpoint);
@@ -517,6 +538,7 @@ const wsdl = require('../lib/wsdl');
 
             delete data.attributes.xsi_type.namespace;
             client.MyOperation(data, (err, result) => {
+              assert.ifError(err);
               assert.ok(client.lastRequest);
               assert.ok(client.lastMessage);
               assert.ok(client.lastEndpoint);
@@ -569,6 +591,7 @@ const wsdl = require('../lib/wsdl');
 
       it('should return an error', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           client.MyOperation({}, (err, result) => {
             assert.ok(err);
             assert.ok(err.response);
@@ -601,6 +624,7 @@ const wsdl = require('../lib/wsdl');
 
       it('should return an error', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           client.MyOperation({}, (err, result) => {
             assert.ok(err);
             assert.ok(err.response);
@@ -612,10 +636,12 @@ const wsdl = require('../lib/wsdl');
 
       it('should emit a \'soapError\' event', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           client.on('soapError', err => {
             assert.ok(err);
           });
           client.MyOperation({}, (err, result) => {
+            assert(err);
             done();
           });
         }, baseUrl);
@@ -644,6 +670,7 @@ const wsdl = require('../lib/wsdl');
 
       it('should return an error', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           client.MyOperation({}, (err, result) => {
             assert.ok(err);
             assert.ok(err.response);
@@ -676,6 +703,7 @@ const wsdl = require('../lib/wsdl');
 
       it('Should emit the "message" event with Soap Body string and an exchange id', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitEvent = false;
           client.on('message', (xml, eid) => {
             didEmitEvent = true;
@@ -694,6 +722,7 @@ const wsdl = require('../lib/wsdl');
 
       it('Should emit the "request" event with entire XML message and an exchange id', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitEvent = false;
           client.on('request', (xml, eid) => {
             didEmitEvent = true;
@@ -712,6 +741,7 @@ const wsdl = require('../lib/wsdl');
 
       it('Should emit the "response" event with Soap Body string and Response object and an exchange id', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitEvent = false;
           client.on('response', (xml, response, eid) => {
             didEmitEvent = true;
@@ -731,6 +761,7 @@ const wsdl = require('../lib/wsdl');
 
       it('Should emit the "request" and "response" events with the same generated exchange id if none is given', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitRequestEvent = false;
           let didEmitResponseEvent = false;
           let requestEid;
@@ -759,6 +790,7 @@ const wsdl = require('../lib/wsdl');
 
       it('Should emit the "request" and "response" events with the given exchange id', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitRequestEvent = false;
           let didEmitResponseEvent = false;
           let requestEid;
@@ -782,12 +814,13 @@ const wsdl = require('../lib/wsdl');
             assert.equal('unit', requestEid);
             assert.equal(responseEid, requestEid);
             done();
-          }, { exchangeId : 'unit' });
+          }, { exchangeId: 'unit' });
         }, baseUrl);
       });
 
       it('should emit a \'soapError\' event with an exchange id', done => {
         soap.createClient(`${__dirname}/wsdl/default_namespace.wsdl`, meta.options, (err, client) => {
+          assert.ifError(err);
           let didEmitEvent = false;
           client.on('soapError', (err, eid) => {
             didEmitEvent = true;
@@ -880,6 +913,7 @@ const wsdl = require('../lib/wsdl');
           request: mockRequestHandler,
         }, meta.options);
         soap.createClient(`${__dirname}/wsdl/builtin_types.wsdl`, options, (err, client) => {
+          assert.ifError(err);
           assert.ok(client);
 
           // Call the method
@@ -895,9 +929,10 @@ const wsdl = require('../lib/wsdl');
 
       it('shall generate correct payload for methods with array parameter', done => {
         soap.createClient(`${__dirname}/wsdl/list_parameter.wsdl`, (err, client) => {
+          assert.ifError(err);
           assert.ok(client);
           const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const arrayParameter = get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({ input: { PeriodList: { PeriodType: [{ PeriodId: '1' }] } } }, () => {
             const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
@@ -910,9 +945,10 @@ const wsdl = require('../lib/wsdl');
       it('shall generate correct payload for methods with array parameter when individual array elements are not namespaced', done => {
         // used for servers that cannot aggregate individually namespaced array elements
         soap.createClient(`${__dirname}/wsdl/list_parameter.wsdl`, { disableCache: true, namespaceArrayElements: false }, (err, client) => {
+          assert.ifError(err);
           assert.ok(client);
           const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const arrayParameter = get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({ input: { PeriodList: { PeriodType: [{ PeriodId: '1' }, { PeriodId: '2' }] } } }, () => {
             const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
@@ -925,10 +961,11 @@ const wsdl = require('../lib/wsdl');
       it('shall generate correct payload for methods with array parameter when individual array elements are namespaced', done => {
         // this is the default behavior for array element namespacing
         soap.createClient(`${__dirname}/wsdl/list_parameter.wsdl`, { disableCache: true, namespaceArrayElements: true }, (err, client) => {
+          assert.ifError(err);
           assert.ok(client);
           assert.ok(client.wsdl.options.namespaceArrayElements === true);
           const pathToArrayContainer = 'TimesheetV201511Mobile.TimesheetV201511MobileSoap.AddTimesheet.input.input.PeriodList';
-          const arrayParameter = _.get(client.describe(), pathToArrayContainer)['PeriodType[]'];
+          const arrayParameter = get(client.describe(), pathToArrayContainer)['PeriodType[]'];
           assert.ok(arrayParameter);
           client.AddTimesheet({ input: { PeriodList: { PeriodType: [{ PeriodId: '1' }, { PeriodId: '2' }] } } }, () => {
             const sentInputContent = client.lastRequest.substring(client.lastRequest.indexOf('<input>') + '<input>'.length, client.lastRequest.indexOf('</input>'));
@@ -941,41 +978,42 @@ const wsdl = require('../lib/wsdl');
       it('shall generate correct payload for recursively-defined types', done => {
         soap.createClient(`${__dirname}/wsdl/recursive2.wsdl`, (err, client) => {
           if (err) {
-            return void done(err);
+            done(err);
+            return;
           }
 
           assert.ok(client);
           client.AddAttribute({
-            Requests:{
-              AddAttributeRequest:[
+            Requests: {
+              AddAttributeRequest: [
                 {
-                  RequestIdx:1,
-                  Identifier:{
-                    SystemNamespace:'bugrepro',
-                    ResellerId:1,
-                    CustomerNum:'860692',
-                    AccountUid:'80a6e559-4d65-11e7-bd5b-0050569a12d7'
+                  RequestIdx: 1,
+                  Identifier: {
+                    SystemNamespace: 'bugrepro',
+                    ResellerId: 1,
+                    CustomerNum: '860692',
+                    AccountUid: '80a6e559-4d65-11e7-bd5b-0050569a12d7'
                   },
-                  Attr:{
-                    AttributeId:716,
-                    IsTemplateAttribute:0,
-                    ReadOnly:0,
-                    CanBeModified:1,
-                    Name:'domain',
-                    AccountElements:{
-                      AccountElement:[
+                  Attr: {
+                    AttributeId: 716,
+                    IsTemplateAttribute: 0,
+                    ReadOnly: 0,
+                    CanBeModified: 1,
+                    Name: 'domain',
+                    AccountElements: {
+                      AccountElement: [
                         {
-                          ElementId:1693,
-                          Name:'domain',
-                          Value:'foo',
-                          ReadOnly:0,
-                          CanBeModified:1
+                          ElementId: 1693,
+                          Name: 'domain',
+                          Value: 'foo',
+                          ReadOnly: 0,
+                          CanBeModified: 1
                         }
                       ]
                     }
                   },
-                  RequestedBy:'blah',
-                  RequestedByLogin:'system'
+                  RequestedBy: 'blah',
+                  RequestedByLogin: 'system'
                 }
               ]
             }
@@ -993,7 +1031,7 @@ const wsdl = require('../lib/wsdl');
     describe('Client created with createClientAsync', () => {
       it('should error on invalid host', done => {
         soap.createClientAsync('http://localhost:1', meta.options)
-          .then(client => {})
+          .then(() => { /* noop */ })
           .catch(err => {
             assert.ok(err);
             done();
@@ -1120,7 +1158,7 @@ const wsdl = require('../lib/wsdl');
       });
 
       it('should allow disabling the wsdl cache', done => {
-        const spy = sinon.spy(wsdl, 'open_wsdl');
+        const spy = sinon.spy(wsdl, 'openWsdl');
         const options = Object.assign({ disableCache: true }, meta.options);
         soap.createClientAsync(`${__dirname}/wsdl/binding_document.wsdl`, options)
           .then(client => {
@@ -1130,7 +1168,7 @@ const wsdl = require('../lib/wsdl');
           .then(client => {
             assert.ok(client);
             assert.ok(spy.calledTwice);
-            wsdl.open_wsdl.restore();
+            wsdl.openWsdl.restore();
             done();
           });
       });
@@ -1162,6 +1200,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
           client.prefixed_MyOperation({}, (err, result) => {
             // only need to check that a valid request is generated, response isn't needed
+            assert.ifError(err);
             assert.ok(client.lastRequest);
             done();
           });
@@ -1172,11 +1211,12 @@ const wsdl = require('../lib/wsdl');
         soap.createClient(`${__dirname}/wsdl/non_identifier_chars_in_operation.wsdl`, meta.options, (err, client) => {
           assert.ok(client);
           assert.ifError(err);
-          /* jshint -W069 */
-          assert.throws(() => {client.MyService.MyServicePort['prefixed_MyOperation']({});}, TypeError);
-          /* jshint +W069 */
-          client.MyService.MyServicePort['prefixed-MyOperation']({}, (err, result) => {
-            // only need to check that a valid request is generated, response isn't needed
+          assert.throws(() => {
+            client.MyService.MyServicePort.prefixed_MyOperation({});
+          }, TypeError);
+          client.MyService.MyServicePort['prefixed-MyOperation']({}, serviceError => {
+            // Only need to check that a valid request is generated, response isn't needed
+            assert(!serviceError);
             assert.ok(client.lastRequest);
             done();
           });
@@ -1191,6 +1231,7 @@ const wsdl = require('../lib/wsdl');
             .then(result => {})
             .catch(err => {
               // only need to check that a valid request is generated, response isn't needed
+              assert.ifError(err);
               assert.ok(client.lastRequest);
               done();
             });
@@ -1213,6 +1254,7 @@ const wsdl = require('../lib/wsdl');
           assert.ifError(err);
           client['prefixed-MyOperation']({}, (err, result) => {
             // only need to check that a valid request is generated, response isn't needed
+            assert.ifError(err);
             assert.ok(client.lastRequest);
             done();
           });
@@ -1223,7 +1265,9 @@ const wsdl = require('../lib/wsdl');
         soap.createClient(`${__dirname}/wsdl/non_identifier_chars_in_operation.wsdl`, meta.options, (err, client) => {
           assert.ok(client);
           assert.ifError(err);
-          assert.throws(() => {client['prefixed-MyOperationAsync']({});}, TypeError);
+          assert.throws(() => {
+            client['prefixed-MyOperationAsync']({});
+          }, TypeError);
           done();
         });
       });

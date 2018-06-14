@@ -53,7 +53,6 @@ describe('SOAP Server', () => {
       }, (error, client) => {
         assert(!error);
         client.DefaultNamespace(json, (error, response) => {
-          console.log(error);
           assert(!error);
           clientResponse = client.lastResponse;
           check(clientResponse, gzipResponse);

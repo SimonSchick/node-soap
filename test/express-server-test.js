@@ -43,7 +43,7 @@ describe('Express server without middleware', () => {
 
     expressServer = express();
     server = expressServer.listen(51515, () => {
-      const soapServer = soap.listen(expressServer, '/SayHello', service, wsdl);
+      soap.listen(expressServer, '/SayHello', service, wsdl);
       url = `http://${server.address().address}:${server.address().port}`;
       if (server.address().address === '0.0.0.0' || server.address().address === '::') {
         url = `http://127.0.0.1:${server.address().port}`;

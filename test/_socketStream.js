@@ -15,12 +15,15 @@ module.exports = function createSocketStream(file, length) {
 
   // Node 4.x requires cork/uncork
   socketStream.cork = function() {
+    // noop
   };
 
   socketStream.uncork = function() {
+    // noop
   };
 
   socketStream.destroy = function() {
+    // noop
   };
 
   socketStream.req = httpReqStream;
@@ -36,14 +39,13 @@ module.exports = function createSocketStream(file, length) {
 
     // This is for compatibility with old node releases <= 0.10
     // Hackish
-    if(semver.lt(process.version, '0.11.0'))
-    {
+    if (semver.lt(process.version, '0.11.0')) {
       socketStream.on('data', data => {
         socketStream.ondata(data, 0, length + header.length);
       });
     }
     // Now write the response with the wsdl
-    const state = socketStream.res.write(header + wsdl);
+    socketStream.res.write(header + wsdl);
   });
 
   return socketStream;

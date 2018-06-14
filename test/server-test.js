@@ -7,6 +7,8 @@ const request = require('request');
 const http = require('http');
 let lastReqAddress;
 
+/* eslint-disable new-cap */
+
 const test = {};
 test.server = null;
 test.service = {
@@ -143,7 +145,7 @@ describe('SOAP Server', () => {
       assert.ifError(err);
       test.soapServer.addSoapHeader('<header1>ONE</header1>');
       test.soapServer.changeSoapHeader(1, { header2: 'TWO' });
-      test.soapServer.addSoapHeader(() => { return { header3: 'THREE' }; });
+      test.soapServer.addSoapHeader(() => ({ header3: 'THREE' }));
 
       client.addSoapHeader({ headerFromClient: 'FOUR' });
       test.soapServer.changeSoapHeader(3, (methodName, args, headers, req) => {
@@ -184,7 +186,7 @@ describe('SOAP Server', () => {
   it('should 500 on wrong message', done => {
     request.post({
       url: `${test.baseUrl}/stockquote?wsdl`,
-      body : '<soapenv:Envelope' +
+      body: '<soapenv:Envelope' +
                     ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"' +
                     ' xmlns:soap="http://service.applicationsnet.com/soap/">' +
                 '  <soapenv:Header/>' +
@@ -205,7 +207,7 @@ describe('SOAP Server', () => {
   it('should 500 on empty message and undefined Content-Type', done => {
     request.post({
       url: `${test.baseUrl}/stockquote?wsdl`,
-      body : '',
+      body: '',
       headers: { 'Content-Type': undefined }
     }, (err, res, body) => {
       assert.ifError(err);
@@ -219,7 +221,7 @@ describe('SOAP Server', () => {
   it('should 500 on missing tag message', done => {
     request.post({
       url: `${test.baseUrl}/stockquote?wsdl`,
-      body : '<soapenv:Envelope' +
+      body: '<soapenv:Envelope' +
                     ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"' +
                     ' xmlns:soap="http://service.applicationsnet.com/soap/">' +
                 '  <soapenv:Header/>' +
@@ -248,7 +250,7 @@ describe('SOAP Server', () => {
     soap.createClient(`${test.baseUrl}/stockquote?wsdl`, (err, client) => {
       assert.ifError(err);
       const description = client.describe();
-      const expected = { input: { tickerSymbol: 'string' }, output:{ price: 'float' } };
+      const expected = { input: { tickerSymbol: 'string' }, output: { price: 'float' } };
       assert.deepEqual(expected, description.StockQuoteService.StockQuotePort.GetLastTradePrice);
       done();
     });

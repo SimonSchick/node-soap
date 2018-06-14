@@ -9,7 +9,9 @@ const wsdlStrictTests = {};
 const wsdlNonStrictTests = {};
 
 fs.readdirSync(`${__dirname}/wsdl/strict`).forEach(file => {
-  if (!/.wsdl$/.exec(file)) {return;}
+  if (!/.wsdl$/.exec(file)) {
+    return;
+  }
   wsdlStrictTests[`should parse and describe ${file}`] = done => {
     soap.createClient(`${__dirname}/wsdl/strict/${file}`, { strict: true }, (err, client) => {
       assert.ifError(err);
@@ -20,7 +22,9 @@ fs.readdirSync(`${__dirname}/wsdl/strict`).forEach(file => {
 });
 
 fs.readdirSync(`${__dirname}/wsdl`).forEach(file => {
-  if (!/.wsdl$/.exec(file)) {return;}
+  if (!/.wsdl$/.exec(file)) {
+    return;
+  }
   wsdlNonStrictTests[`should parse and describe ${file}`] = done => {
     soap.createClient(`${__dirname}/wsdl/${file}`, (err, client) => {
       assert.ifError(err);
@@ -31,7 +35,7 @@ fs.readdirSync(`${__dirname}/wsdl`).forEach(file => {
 });
 
 wsdlNonStrictTests['should not parse connection error'] = done => {
-  soap.createClient(`${__dirname}/wsdl/connection/econnrefused.wsdl`, (err, client) => {
+  soap.createClient(`${__dirname}/wsdl/connection/econnrefused.wsdl`, err => {
     assert.ok(/EADDRNOTAVAIL|ECONNREFUSED/.test(err), err);
     done();
   });
@@ -54,8 +58,10 @@ wsdlStrictTests['should catch parse error'] = done => {
 wsdlStrictTests['should parse external wsdl'] = done => {
   soap.createClient(`${__dirname}/wsdl/wsdlImport/main.wsdl`, { strict: true }, (err, client) => {
     assert.ifError(err);
-    assert.deepEqual(Object.keys(client.wsdl.definitions.schemas),
-      ['http://example.com/', 'http://schemas.microsoft.com/2003/10/Serialization/Arrays']);
+    assert.deepEqual(
+      Object.keys(client.wsdl.definitions.schemas),
+      ['http://example.com/', 'http://schemas.microsoft.com/2003/10/Serialization/Arrays']
+    );
     assert.equal(typeof client.getLatestVersion, 'function');
     done();
   });
@@ -92,7 +98,8 @@ wsdlStrictTests['should handle element ref'] = done => {
     '</bar1:paymentRq></ns1:fooRq>';
   soap.createClient(`${__dirname}/wsdl/elementref/foo.wsdl`, { strict: true }, (err, client) => {
     assert.ifError(err);
-    client.fooOp({ paymentRq: { bankSvcRq: { requestUID: '001' } } }, (err, result) => {
+    client.fooOp({ paymentRq: { bankSvcRq: { requestUID: '001' } } }, err => {
+      assert.ifError(err);
       assert.equal(client.lastMessage, expectedMsg);
       done();
     });
@@ -104,7 +111,8 @@ wsdlStrictTests['should handle type ref'] = done => {
   const reqJson = require('./wsdl/typeref/request.json');
   soap.createClient(`${__dirname}/wsdl/typeref/order.wsdl`, { strict: true }, (err, client) => {
     assert.ifError(err);
-    client.order(reqJson, (err, result) => {
+    client.order(reqJson, err => {
+      assert.ifError(err);
       assert.equal(client.lastMessage, expectedMsg);
       done();
     });
@@ -121,7 +129,8 @@ wsdlStrictTests['should parse POJO into xml without making unnecessary recursion
     let spyCall;
 
     assert.ifError(err);
-    client.order(reqJson, (err, result) => {
+    client.order(reqJson, err => {
+      assert.ifError(err);
       assert.equal(client.lastMessage, expectedMsg);
 
       // since the reqJson does not use the element named "thing", then findChildSchemaObject should never get to the type named RabbitHole
@@ -153,7 +162,8 @@ wsdlStrictTests['should get empty namespace prefix'] = done => {
 
   soap.createClient(`${__dirname}/wsdl/elementref/foo.wsdl`, { strict: true }, (err, client) => {
     assert.ifError(err);
-    client.fooOp({ paymentRq: { bankSvcRq: { ':requestUID': '001' } } }, (err, result) => {
+    client.fooOp({ paymentRq: { bankSvcRq: { ':requestUID': '001' } } }, err => {
+      assert.ifError(err);
       assert.equal(client.lastMessage, expectedMsg);
       done();
     });
@@ -180,7 +190,8 @@ wsdlNonStrictTests['should all attributes to root elements'] = done => {
 
   soap.createClient(`${__dirname}/wsdl/elementref/foo.wsdl`, {}, (err, client) => {
     assert.ok(!err);
-    client.fooOp({ paymentRq: { attributes: { 'bar1:test': 'attr' }, bankSvcRq: { ':requestUID': '001' } } }, (err, result) => {
+    client.fooOp({ paymentRq: { attributes: { 'bar1:test': 'attr' }, bankSvcRq: { ':requestUID': '001' } } }, err => {
+      assert.ifError(err);
       assert.equal(client.lastMessage, expectedMsg);
       done();
     });

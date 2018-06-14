@@ -1,11 +1,8 @@
 'use strict';
 
 const soap = require('..');
-const http = require('http');
 const assert = require('assert');
-const req = require('request');
 const httpClient = require('../lib/http.js');
-const util = require('util');
 const { EventEmitter } = require('events');
 const createSocketStream = require('./_socketStream');
 
@@ -13,7 +10,7 @@ it('should allow customization of httpClient, the wsdl file, and associated data
 
   // Make a custom http agent to use streams instead of a real net socket
   class CustomAgent extends EventEmitter {
-    constructor(options, wsdl, xsd){
+    constructor(options, wsdl, xsd) {
       super();
       this.requests = [];
       this.maxSockets = 1;
@@ -29,48 +26,50 @@ it('should allow customization of httpClient, the wsdl file, and associated data
       } else {
         req.onSocket(this.wsdlStream);
       }
-    };
+    }
   }
 
   // Custom httpClient
   class MyHttpClient extends httpClient {
-    constructor(options, wsdlSocket, xsdSocket){
+    constructor(options, wsdlSocket, xsdSocket) {
       super(options);
       this.agent = new CustomAgent(options, wsdlSocket, xsdSocket);
     }
 
     request(rurl, data, callback, exheaders, exoptions) {
-      const self = this;
-      const options = self.buildRequest(rurl, data, exheaders, exoptions);
+      const options = this.buildRequest(rurl, data, exheaders, exoptions);
       // Specify agent to use
       options.agent = this.agent;
       const { headers } = options;
-      const req = self._request(options, (err, res, body) => {
+      const req = this._request(options, (err, res, body) => {
         if (err) {
-          return callback(err);
+          callback(err);
+          return;
         }
-        body = self.handleResponse(req, res, body);
+        body = this.handleResponse(req, res, body);
         callback(null, res, body);
       });
       if (headers.Connection !== 'keep-alive') {
         req.end(data);
       }
       return req;
-    };
+    }
   }
 
-  const httpCustomClient = new MyHttpClient({},
+  const httpCustomClient = new MyHttpClient(
+    {},
     createSocketStream(`${__dirname}/wsdl/xsdinclude/xsd_include_http.wsdl`, 2708),
     createSocketStream(`${__dirname}/wsdl/xsdinclude/types.xsd`, 982)
   );
   const url = 'http://localhost:50000/Dummy.asmx?wsdl';
-  soap.createClient(url,
+  soap.createClient(
+    url,
     { httpClient: httpCustomClient },
     (err, client) => {
       assert.ok(client);
       assert.ifError(err);
       assert.equal(client.httpClient, httpCustomClient);
-      const description = (client.describe());
+      client.describe();
       assert.deepEqual(client.describe(), {
         DummyService: {
           DummyPortType: {
@@ -87,5 +86,6 @@ it('should allow customization of httpClient, the wsdl file, and associated data
         }
       });
       done();
-    });
+    }
+  );
 });

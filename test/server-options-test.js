@@ -5,7 +5,6 @@ const soap = require('..');
 const assert = require('assert');
 const request = require('request');
 const http = require('http');
-let lastReqAddress;
 
 const test = {};
 test.server = null;
@@ -47,7 +46,6 @@ test.service = {
       },
 
       IsValidPrice(args, cb, soapHeader, req) {
-        lastReqAddress = req.connection.remoteAddress;
 
         const validationError = {
           Fault: {
@@ -120,10 +118,8 @@ describe('SOAP Server with Options', () => {
       if (test.server.address().address === '0.0.0.0' || test.server.address().address === '::') {
         test.baseUrl = `http://127.0.0.1:${test.server.address().port}`;
       }
-      // console.log(test.baseUrl);
       request(test.baseUrl, (err, res, body) => {
         assert.ifError(err);
-        console.log(body);
         done();
       });
     });
@@ -149,7 +145,6 @@ describe('SOAP Server with Options', () => {
       }
       request(test.baseUrl, (err, res, body) => {
         assert.ifError(err);
-        console.log(body);
         done();
       });
     });
@@ -272,7 +267,7 @@ describe('SOAP Server with Options', () => {
 
       request.post({
         url: `${test.baseUrl}/stockquote?wsdl`,
-        body : '<soapenv:Envelope' +
+        body: '<soapenv:Envelope' +
                     ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"' +
                     ' xmlns:soap="http://service.applicationsnet.com/soap/">' +
                 '  <soapenv:Header/>' +
@@ -323,8 +318,10 @@ describe('SOAP Server with Options', () => {
       }, (err, res, body) => {
         assert.ifError(err);
         assert.equal(res.statusCode, 500);
-        assert.ok(body.match(/<faultcode>.*<\/faultcode>/g),
-          'Invalid XML');
+        assert.ok(
+          body.match(/<faultcode>.*<\/faultcode>/g),
+          'Invalid XML'
+        );
         done();
       }
       );
@@ -346,7 +343,6 @@ describe('SOAP Server with Options', () => {
       if (test.server.address().address === '0.0.0.0' || test.server.address().address === '::') {
         test.baseUrl = `http://127.0.0.1:${test.server.address().port}`;
       }
-      // console.log(test.baseUrl);
       request.post({
         url: `${test.baseUrl}/stockquote`,
         body: '<soapenv:Envelope' +
@@ -375,12 +371,11 @@ describe('SOAP Server with Options', () => {
       }, test.service, test.wsdl);
       test.baseUrl = `http://${test.server.address().address}:${test.server.address().port}`;
 
-      // windows return 0.0.0.0 as address and that is not
-      // valid to use in a request
+      // Windows return 0.0.0.0 as address and that is not
+      // Valid to use in a request
       if (test.server.address().address === '0.0.0.0' || test.server.address().address === '::') {
         test.baseUrl = `http://127.0.0.1:${test.server.address().port}`;
       }
-      // console.log(test.baseUrl);
       request.post({
         url: `${test.baseUrl}/stockquote`,
         body: '<soapenv:Envelope' +
